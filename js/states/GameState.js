@@ -15,6 +15,20 @@ SpaceShip.GameState = {
     // enemy player distance
     this.ENEMY_DIS = this.CENTER.distance(new Phaser.Point(0, 0))
     this.ENEMY_SPEED = 10
+    this.ENEMY_TYPE = {
+      'ufo': {
+        texture: SpaceShip.UFOTexture(),
+        health: 3,
+      },
+      'meteor': {
+        texture: SpaceShip.UFOTexture(),
+        health: 2,
+      },
+      'carrier': {
+        texture: SpaceShip.UFOTexture(),
+        health: 4,
+      }
+    }
 
     // start physic engine
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -26,8 +40,9 @@ SpaceShip.GameState = {
     this.playerShieldTexture = SpaceShip.PlayerShieldTexture()
     this.playerGunTexture = SpaceShip.PlayerGunTexture()
     this.playerBulletTexture = SpaceShip.PlayerBulletTexture()
-    // enemy UFO
-    this.UFOTexture = SpaceShip.UFOTexture()
+
+    // level data
+    this.load.text('lv1', 'data/level/1.json')
 
   },
 
@@ -60,8 +75,7 @@ SpaceShip.GameState = {
 
     // create enemies
     this.initEnemies()
-    this.createEnemy(this.UFOTexture, 10)
-    // this.enemy = this.game.add.sprite(300, 300, this.UFOTexture)
+    this.loadLevel()
   },
 
   update () {
@@ -116,12 +130,17 @@ SpaceShip.GameState = {
     this.enemies.enableBody = true
   },
 
-  createEnemy (texture, health) {
+  createEnemy (type) {
     let enemy = this.enemies.getFirstExists(false)
 
     // 隨機決定位置
     let angle = this.game.rnd.angle()
     let position = new Phaser.Point(this.playerCore.x + 200, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
+    
+    // 決定敵人種類
+    let texture = this.ENEMY_TYPE[type].texture
+    let health = this.ENEMY_TYPE[type].health
+
     if(!enemy) {
       enemy = new SpaceShip.Enemy(this.game, position.x, position.y, texture, health, this.ENEMY_SPEED, this.playerCore)
       this.enemies.add(enemy)
@@ -129,5 +148,26 @@ SpaceShip.GameState = {
     enemy.reset(position.x, position.y, health, texture)
   },
 
+  loadLevel () {
+    this.currentEnemyIndex = 0
 
+    this.levelData = JSON.parse(this.game.cache.getText(`lv1`))
+
+    this.scheduleNextEnemy()
+
+  },
+
+  scheduleNextEnemy () {
+    let nextEnemy = this.levelData.enemies[this.currentEnemyIndex]
+
+    if(nextEnemy) {
+      let nextTime = Phaser.Timer.SECOND * nextEnemy.time - (this.currentEnemyIndex === 0 ? 0 : this.levelData.enemies[this.currentEnemyIndex-1].time)
+      this.nextEnemyTimer = this.game.time.events.add(nextTime, () => {
+        this.createEnemy(nextEnemy.type)
+
+        this.currentEnemyIndex++
+        this.scheduleNextEnemy()
+      })
+    }
+  }
 }
