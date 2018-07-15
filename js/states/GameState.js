@@ -39,11 +39,13 @@ SpaceShip.GameState = {
     this.game.physics.arcade.enable(this.playerGun)
     // create player bullet
     this.initPlayerBullets()
-    this.bulletTimer = this.game.time.events.loop(Phaser.Timer.SECOND/5, this.createPlayerBullet, this)
-
+    this.bulletTimer = this.game.time.create(false)
+    this.bulletTimer.loop(Phaser.Timer.SECOND/5, this.createPlayerBullet, this)
+    this.bulletTimer.start()
   },
 
   update () {
+    // gun and shield rotation
     let pointerAngle = this.game.physics.arcade.angleToPointer(this.playerCore)
     let playerGunAngle = this.game.physics.arcade.angleBetween(this.playerCore, this.playerGun)
     
@@ -59,6 +61,14 @@ SpaceShip.GameState = {
 
       this.playerShield.angle = this.playerGun.angle
       this.playerShield.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
+    }
+
+    // press W to shoot
+    if (this.game.input.keyboard.isDown(Phaser.Keyboard.W)) {
+      this.bulletTimer.resume()
+    }
+    else {
+      this.bulletTimer.pause()
     }
   },
 
