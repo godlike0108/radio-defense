@@ -4,7 +4,7 @@ SpaceShip.GameState = {
   init () {
     this.CENTER = new Phaser.Point(this.game.world.centerX, this.game.world.centerY)
     // player settings
-    this.ANG_VEL = 1
+    this.ANG_VEL = 2
     this.ANG_TOL = this.game.math.degToRad(6) // 在此角度區間為靜止
     this.GUN_DIS = 90
     this.SHIELD_DIS = 90
@@ -14,7 +14,7 @@ SpaceShip.GameState = {
     // enemy settings
     // enemy player distance
     this.ENEMY_DIS = this.CENTER.distance(new Phaser.Point(0, 0))
-    this.ENEMY_SPEED = 10
+    this.ENEMY_SPEED = 50
     this.ENEMY_TYPE = {
       'ufo': {
         texture: SpaceShip.UFOTexture(),
@@ -103,6 +103,9 @@ SpaceShip.GameState = {
     } else {
       this.bulletTimer.pause()
     }
+
+    // bullet and enemy collision detection
+    this.game.physics.arcade.overlap(this.enemies, this.playerBullets, this.damageEnemy, null, this)
   },
 
   initPlayerBullets () {
@@ -135,7 +138,7 @@ SpaceShip.GameState = {
 
     // 隨機決定位置
     let angle = this.game.rnd.angle()
-    let position = new Phaser.Point(this.playerCore.x + 200, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
+    let position = new Phaser.Point(this.playerCore.x + this.ENEMY_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
     
     // 決定敵人種類
     let texture = this.ENEMY_TYPE[type].texture
@@ -146,6 +149,11 @@ SpaceShip.GameState = {
       this.enemies.add(enemy)
     }
     enemy.reset(position.x, position.y, health, texture)
+  },
+
+  damageEnemy (enemy, bullet) {
+    enemy.damage(1)
+    bullet.kill()
   },
 
   loadLevel () {
