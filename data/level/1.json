@@ -1,0 +1,22 @@
+{
+  "enemies": [
+    {
+      "time": 1,
+      "x": 0.05,
+      "health": 10,
+      "speedX": 20,
+      "speedY": 50,
+      "key": "greenEnemy",
+      "scale": 3
+    },
+    {
+      "time": 2,
+      "x": 0.2,
+      "health": 6,
+      "speedX": 20,
+      "speedY": 50,
+      "key": "greenEnemy",
+      "scale": 2
+    },
+  ]
+}
