@@ -145,7 +145,7 @@ SpaceShip.GameState = {
     let health = this.ENEMY_TYPE[type].health
 
     if(!enemy) {
-      enemy = new SpaceShip.Enemy(this.game, position.x, position.y, texture, health, this.ENEMY_SPEED, this.playerCore)
+      enemy = new SpaceShip.UFO(this.game, position.x, position.y, texture, health, this.ENEMY_SPEED, this.playerCore)
       this.enemies.add(enemy)
     }
     enemy.reset(position.x, position.y, health, texture)

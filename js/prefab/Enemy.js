@@ -1,3 +1,5 @@
+var SpaceShip = SpaceShip || {}
+
 SpaceShip.Enemy = class Enemy extends Phaser.Sprite {
   constructor (game, x, y, texture, health, speed, target) {
     super(game, x, y, texture, health)
