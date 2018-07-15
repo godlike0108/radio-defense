@@ -7,6 +7,7 @@ SpaceShip.GameState = {
     this.ANG_TOL = this.game.math.degToRad(6) // 在此角度區間為靜止
     this.GUN_DIS = 90
     this.SHIELD_DIS = 90
+    this.BULLET_SPEED = 500
     // start physic engine
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
   },
@@ -16,6 +17,7 @@ SpaceShip.GameState = {
     this.playerTexture = SpaceShip.PlayerTexture()
     this.playerShieldTexture = SpaceShip.PlayerShieldTexture()
     this.playerGunTexture = SpaceShip.PlayerGunTexture()
+    this.playerBulletTexture = SpaceShip.PlayerBulletTexture()
   },
 
   create () {
@@ -35,6 +37,10 @@ SpaceShip.GameState = {
     this.playerGun.anchor.setTo(0.5)
     this.playerGun.scale.setTo(0.8)
     this.game.physics.arcade.enable(this.playerGun)
+    // create player bullet
+    this.initPlayerBullets()
+    this.bulletTimer = this.game.time.events.loop(Phaser.Timer.SECOND/5, this.createPlayerBullet, this)
+
   },
 
   update () {
@@ -55,4 +61,24 @@ SpaceShip.GameState = {
       this.playerShield.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
     }
   },
+
+  initPlayerBullets () {
+    this.playerBullets = this.add.group()
+    this.playerBullets.enableBody = true
+  },
+
+  createPlayerBullet () {
+    let bullet = this.playerBullets.getFirstExists(false)
+
+    if(!bullet) {
+      bullet = new SpaceShip.PlayerBullet(this.game, this.playerGun.x, this.playerGun.y, this.playerBulletTexture)
+      this.playerBullets.add(bullet)
+    } else {
+      // reset position
+      bullet.reset(this.playerGun.x, this.playerGun.y)
+    }
+    // set velocity
+    this.game.physics.arcade.velocityFromRotation(this.playerGun.rotation, this.BULLET_SPEED, bullet.body.velocity)
+    bullet.rotation = this.playerGun.rotation
+  }
 }
