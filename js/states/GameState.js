@@ -27,25 +27,32 @@ SpaceShip.GameState = {
     this.player = this.game.add.sprite(this.CENTER.x, this.CENTER.y, this.playerTexture)
     this.player.anchor.setTo(0.5)
     // create player shield
-    this.playerShield = this.game.add.sprite(this.CENTER.x, this.CENTER.y + 90, this.playerShieldTexture)
+    this.playerShield = this.game.add.sprite(this.CENTER.x - this.SHIELD_DIS, this.CENTER.y, this.playerShieldTexture)
     this.playerShield.anchor.setTo(0.5)
+    this.game.physics.arcade.enable(this.playerShield)
     // create player gun
     this.playerGun = this.game.add.sprite(this.playerCore.x + this.GUN_DIS, this.playerCore.y, this.playerGunTexture)
     this.playerGun.anchor.setTo(0.5)
     this.playerGun.scale.setTo(0.8)
-    this.playerGun.angle = 90
     this.game.physics.arcade.enable(this.playerGun)
   },
 
   update () {
     let pointerAngle = this.game.physics.arcade.angleToPointer(this.playerCore)
     let playerGunAngle = this.game.physics.arcade.angleBetween(this.playerCore, this.playerGun)
+    
     if (pointerAngle - playerGunAngle > this.ANG_TOL/2 && pointerAngle - playerGunAngle <= Math.PI || pointerAngle - playerGunAngle < 0 && pointerAngle - playerGunAngle < -Math.PI) {
       this.playerGun.angle += this.ANG_VEL
       this.playerGun.position.rotate(this.playerCore.x, this.playerCore.y, this.ANG_VEL, true)
+
+      this.playerShield.angle = this.playerGun.angle
+      this.playerShield.position.rotate(this.playerCore.x, this.playerCore.y, this.ANG_VEL, true)
     } else if (pointerAngle - playerGunAngle < -this.ANG_TOL/2 && pointerAngle - playerGunAngle <= Math.PI || pointerAngle - playerGunAngle > 0 && pointerAngle - playerGunAngle > Math.PI) {
       this.playerGun.angle -= this.ANG_VEL
       this.playerGun.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
+
+      this.playerShield.angle = this.playerGun.angle
+      this.playerShield.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
     }
   },
 }

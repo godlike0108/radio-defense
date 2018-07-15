@@ -5,7 +5,7 @@ SpaceShip.PlayerShieldTexture = function () {
   let playerShieldTexture = this.game.add.graphics()
   let center = new Phaser.Point(100, 100)
   let radius = 90
-  let angle = 90
+  let angle = 180
   let range = 60
 
   // draw an outer arc
