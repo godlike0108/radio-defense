@@ -11,6 +11,7 @@ SpaceShip.GameState = {
     this.SHIELD_RNG = 60
     this.BULLET_SPEED = 500
     this.SHOOT_SPEED = Phaser.Timer.SECOND/5*2
+    this.PLAYER_HEALTH = 3
 
     // player boosts
     this.SHIELD_RNG_BIG = 180
@@ -52,6 +53,7 @@ SpaceShip.GameState = {
     this.playerCore = this.game.add.sprite(this.CENTER.x, this.CENTER.y, this.playerCoreTexture)
     this.playerCore.anchor.setTo(0.5)
     this.game.physics.arcade.enable(this.playerCore)
+    this.playerCore.health = this.PLAYER_HEALTH
 
     // create player
     this.player = this.game.add.sprite(this.CENTER.x, this.CENTER.y, this.playerTexture)
@@ -126,14 +128,16 @@ SpaceShip.GameState = {
       // shield ane enemy collision detection
       this.game.physics.arcade.overlap(this.playerShield, this[type], this.killEnemy, null, this)
       this.game.physics.arcade.overlap(this.playerBigShield, this[type], this.killEnemy, null, this)
+      // enemy and player
+      this.game.physics.arcade.overlap(this.playerCore, this[type], this.damagePlayer, null, this)
     })
 
-    // enemy bullet and shield
     this.ENEMY_BULLETS.forEach(type => {
+      // enemy bullet and shield
       this.game.physics.arcade.overlap(this.playerShield, this[type], this.killBullets, null, this)
-    })
-    this.ENEMY_BULLETS.forEach(type => {
       this.game.physics.arcade.overlap(this.playerBigShield, this[type], this.killBullets, null, this)
+      // enemy bullet and core
+      this.game.physics.arcade.overlap(this.playerCore, this[type], this.damagePlayer, null, this)
     })
 
     // itemBoxes and playerBullets collision
@@ -257,6 +261,11 @@ SpaceShip.GameState = {
 
   killBullets (shield, bullet) {
     bullet.kill()
+  },
+
+  damagePlayer(playerCore, enemyThings) {
+    enemyThings.kill()
+    playerCore.damage(1)
   },
 
   loadLevel () {
