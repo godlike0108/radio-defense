@@ -1,18 +1,18 @@
 var SpaceShip = SpaceShip || {}
 
 SpaceShip.Enemy = class Enemy extends Phaser.Sprite {
-  constructor (game, x, y, texture, health, speed, target) {
-    super(game, x, y, texture, health)
+  constructor (game, x, y, speed, target, type) {
+    super(game, x, y)
 
     this.anchor.setTo(0.5)
-    this.health = health
     this.speed = speed
     this.target = target
+    this.type = type
   }
 
-  reset (x, y, health, texture) {
-    super.reset(x, y, health)
-    this.loadTexture(texture)
+  reset (x, y, type) {
+    super.reset(x, y)
+    this.type = type
   }
 
   update () {

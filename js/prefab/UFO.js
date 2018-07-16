@@ -1,12 +1,16 @@
 var SpaceShip = SpaceShip || {}
 
 SpaceShip.UFO = class UFO extends SpaceShip.Enemy {
-  constructor (game, x, y, texture, health, speed, target, enemyBullets, bulletTexture) {
-    super(game, x, y, texture, health, speed, target)
+  constructor (game, x, y, speed, target, type, enemyBullets, bulletTexture) {
+    super(game, x, y, speed, target, type)
     this.ANG_VEL = 0.1
     this.BULLET_SPEED = 50
     this.bullets = enemyBullets
     this.bulletTexture = bulletTexture
+    this.health = 3
+    console.log(this.health)
+    this.loadTexture(SpaceShip.UFOTexture(game))
+
     // turret setting
     this.TURRET_DIS = 30
     this.turretPos = new Phaser.Point(this.x + this.TURRET_DIS ,this.y).rotate(this.x, this.y, this.position.angle(this.target, true), true)
@@ -20,6 +24,19 @@ SpaceShip.UFO = class UFO extends SpaceShip.Enemy {
     this.game.physics.arcade.moveToObject(this, this.target, this.speed)
     this.position.rotate(this.target.x, this.target.y, this.ANG_VEL, true)
     this.turretPos = new Phaser.Point(this.x + this.TURRET_DIS ,this.y).rotate(this.x, this.y, this.position.angle(this.target, true), true)
+  }
+
+  damage (amount) {
+    super.damage(amount)
+
+    if (this.health <= 0) {
+      this.enemyTimer.pause()
+    }
+  }
+
+  reset (x, y, type) {
+    super.reset(x, y, type)
+    this.enemyTimer.resume()
   }
 
   shoot () {

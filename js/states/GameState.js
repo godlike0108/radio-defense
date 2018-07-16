@@ -15,20 +15,6 @@ SpaceShip.GameState = {
     // enemy player distance
     this.ENEMY_DIS = this.CENTER.distance(new Phaser.Point(0, 0))
     this.ENEMY_SPEED = 10
-    this.ENEMY_TYPE = {
-      'ufo': {
-        texture: SpaceShip.UFOTexture,
-        health: 3,
-      },
-      'meteor': {
-        texture: SpaceShip.MeteoriteTexture,
-        health: 2,
-      },
-      'carrier': {
-        texture: SpaceShip.UFOTexture,
-        health: 4,
-      }
-    }
 
     // start physic engine
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -41,6 +27,8 @@ SpaceShip.GameState = {
     this.playerGunTexture = SpaceShip.PlayerGunTexture(this.game)
     this.playerBulletTexture = SpaceShip.PlayerBulletTexture(this.game)
     // enemy textures
+    this.UFOTexture = SpaceShip.UFOTexture(this.game)
+    this.MeteoriteTexture = SpaceShip.MeteoriteTexture(this.game)
     this.UFOBulletTexture = SpaceShip.UFOBulletTexture(this.game)
 
     // level data
@@ -77,8 +65,6 @@ SpaceShip.GameState = {
 
     // create enemies
     this.initEnemies()
-
-    this.met = this.game.add.sprite(300, 300, this.ENEMY_TYPE['meteor'].texture(this.game))
 
     // create enemy bullets
     this.initEnemyBullets()
@@ -147,26 +133,22 @@ SpaceShip.GameState = {
     // 隨機決定位置
     let angle = this.game.rnd.angle()
     let position = new Phaser.Point(this.playerCore.x + 300, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
-    
-    // 決定敵人種類
-    let texture = this.ENEMY_TYPE[type].texture(this.game)
-    console.log(texture)
-    let health = this.ENEMY_TYPE[type].health
 
-    if(!enemy) {
+    if(!enemy || enemy.type !== type) {
       switch(type) {
         case 'ufo':
-          enemy = new SpaceShip.UFO(this.game, position.x, position.y, texture, health, this.ENEMY_SPEED, this.playerCore, this.enemyBullets, this.UFOBulletTexture)
+          enemy = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type, this.enemyBullets, this.UFOBulletTexture)
           break
         case 'meteor':
-          enemy = enemy = new SpaceShip.Meteorite(this.game, position.x, position.y, texture, health, this.ENEMY_SPEED, this.playerCore)
+          enemy = enemy = new SpaceShip.Meteorite(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type)
           break
         case 'carrier':
-          enemy = new SpaceShip.UFO(this.game, position.x, position.y, texture, health, this.ENEMY_SPEED, this.playerCore, this.enemyBullets, this.UFOBulletTexture)
+          enemy = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type, this.enemyBullets, this.UFOBulletTexture)
       }
       this.enemies.add(enemy)
+    } else {
+      enemy.reset(position.x, position.y, type)
     }
-    enemy.reset(position.x, position.y, health, texture)
   },
 
   damageEnemy (enemy, bullet) {
