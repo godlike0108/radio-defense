@@ -13,6 +13,7 @@ SpaceShip.GameState = {
 
     // enemy settings
     // enemy player distance
+    this.ENEMY_GROUP = ['UFOs', 'meteors', 'carriers', 'smallmeteors', 'jets']
     this.ENEMY_DIS = this.CENTER.distance(new Phaser.Point(0, 0))
     this.ENEMY_SPEED = 20
 
@@ -97,7 +98,10 @@ SpaceShip.GameState = {
     }
 
     // bullet and enemy collision detection
-    this.game.physics.arcade.overlap(this.enemies, this.playerBullets, this.damageEnemy, null, this)
+    this.ENEMY_GROUP.forEach(type => {
+      this.game.physics.arcade.overlap(this[type], this.playerBullets, this.damageEnemy, null, this)
+    })
+
   },
 
   initPlayerBullets () {
@@ -121,31 +125,51 @@ SpaceShip.GameState = {
   },
 
   initEnemies () {
-    this.enemies = this.add.group()
-    this.enemies.enableBody = true
+    this.ENEMY_GROUP.forEach(type => {
+      this[type] = this.add.group()
+      this[type].enableBody = true
+    })
   },
 
-  createEnemy (type) {
-    let enemy = this.enemies.getFirstExists(false)
-
+  createUFO () {
+    let ufo = this.UFOs.getFirstExists(false)
     // 隨機決定位置
     let angle = this.game.rnd.angle()
     let position = new Phaser.Point(this.playerCore.x+this.ENEMY_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
 
-    if(!enemy || enemy.type !== type) {
-      switch(type) {
-        case 'ufo':
-          enemy = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type)
-          break
-        case 'meteor':
-          enemy = enemy = new SpaceShip.Meteorite(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type, this.enemies)
-          break
-        case 'carrier':
-          enemy = new SpaceShip.Carrier(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type, this.enemies)
-      }
-      this.enemies.add(enemy)
+    if(!ufo) {
+      ufo = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore)
+      this.UFOs.add(ufo)
     } else {
-      enemy.reset(position.x, position.y, type)
+      ufo.reset(position.x, position.y)
+    }
+  },
+
+  createMeteor () {
+    let meteor = this.meteors.getFirstExists(false)
+    // 隨機決定位置
+    let angle = this.game.rnd.angle()
+    let position = new Phaser.Point(this.playerCore.x+this.ENEMY_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
+
+    if(!meteor) {
+      meteor = new SpaceShip.Meteorite(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.smallmeteors)
+      this.meteors.add(meteor)
+    } else {
+      meteor.reset(position.x, position.y)
+    }
+  },
+
+  createCarrier () {
+    let carrier = this.carriers.getFirstExists(false)
+    // 隨機決定位置
+    let angle = this.game.rnd.angle()
+    let position = new Phaser.Point(this.playerCore.x+this.ENEMY_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
+
+    if(!carrier) {
+      carrier = new SpaceShip.Carrier(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.jets)
+      this.carriers.add(carrier)
+    } else {
+      carrier.reset(position.x, position.y)
     }
   },
 
@@ -169,7 +193,16 @@ SpaceShip.GameState = {
     if(nextEnemy) {
       let nextTime = Phaser.Timer.SECOND * nextEnemy.time - (this.currentEnemyIndex === 0 ? 0 : this.levelData.enemies[this.currentEnemyIndex-1].time)
       this.nextEnemyTimer = this.game.time.events.add(nextTime, () => {
-        this.createEnemy(nextEnemy.type)
+        switch(nextEnemy.type) {
+          case 'ufo':
+            this.createUFO()
+            break
+          case 'meteor':
+            this.createMeteor()
+            break
+          case 'carrier':
+            this.createCarrier()
+        }
 
         this.currentEnemyIndex++
         this.scheduleNextEnemy()

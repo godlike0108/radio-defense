@@ -6,7 +6,6 @@ SpaceShip.SmallMeteorite = class SmallMeteorite extends SpaceShip.Enemy {
     this.health = 1
     this.loadTexture(SpaceShip.MeteoriteTexture(game))
     this.scale.setTo(0.6)
-    this.type = 'smallmeteor'
   }
 
   update () {

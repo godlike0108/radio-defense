@@ -1,8 +1,8 @@
 var SpaceShip = SpaceShip || {}
 
 SpaceShip.UFO = class UFO extends SpaceShip.Enemy {
-  constructor (game, x, y, speed, target, type) {
-    super(game, x, y, speed, target, type)
+  constructor (game, x, y, speed, target) {
+    super(game, x, y, speed, target)
     this.ANG_VEL = 0.1
     this.BULLET_SPEED = 50
     this.health = 3
@@ -31,8 +31,8 @@ SpaceShip.UFO = class UFO extends SpaceShip.Enemy {
     }
   }
 
-  reset (x, y, type) {
-    super.reset(x, y, type)
+  reset (x, y) {
+    super.reset(x, y)
     this.enemyTimer.resume()
   }
 
