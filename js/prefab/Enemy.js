@@ -8,6 +8,8 @@ SpaceShip.Enemy = class Enemy extends Phaser.Sprite {
     this.speed = speed
     this.target = target
     this.type = type
+    this.bullets = this.game.add.group()
+    this.bullets.enableBody = true
   }
 
   reset (x, y, type) {

@@ -1,12 +1,12 @@
 {
   "enemies": [
     {
-      "time": 1,
-      "type": "meteor"
+      "time": 0.5,
+      "type": "carrier"
     },
     {
       "time": 2,
-      "type": "ufo"
+      "type": "carrier"
     },
     {
       "time": 3,

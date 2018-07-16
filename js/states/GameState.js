@@ -28,8 +28,9 @@ SpaceShip.GameState = {
     this.playerBulletTexture = SpaceShip.PlayerBulletTexture(this.game)
     // enemy textures
     this.UFOTexture = SpaceShip.UFOTexture(this.game)
-    this.MeteoriteTexture = SpaceShip.MeteoriteTexture(this.game)
     this.UFOBulletTexture = SpaceShip.UFOBulletTexture(this.game)
+    this.MeteoriteTexture = SpaceShip.MeteoriteTexture(this.game)
+    this.CarrierTexture = SpaceShip.CarrierTexture(this.game)
 
     // level data
     this.load.text('lv1', 'data/level/1.json')
@@ -65,9 +66,6 @@ SpaceShip.GameState = {
 
     // create enemies
     this.initEnemies()
-
-    // create enemy bullets
-    this.initEnemyBullets()
 
     this.loadLevel()
   },
@@ -137,13 +135,13 @@ SpaceShip.GameState = {
     if(!enemy || enemy.type !== type) {
       switch(type) {
         case 'ufo':
-          enemy = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type, this.enemyBullets, this.UFOBulletTexture)
+          enemy = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type)
           break
         case 'meteor':
           enemy = enemy = new SpaceShip.Meteorite(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type, this.enemies)
           break
         case 'carrier':
-          enemy = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type, this.enemyBullets, this.UFOBulletTexture)
+          enemy = new SpaceShip.Carrier(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type, this.enemies)
       }
       this.enemies.add(enemy)
     } else {
@@ -154,11 +152,6 @@ SpaceShip.GameState = {
   damageEnemy (enemy, bullet) {
     enemy.damage(1)
     bullet.kill()
-  },
-
-  initEnemyBullets () {
-    this.enemyBullets = this.add.group()
-    this.enemyBullets.enableBody = true
   },
 
   loadLevel () {
