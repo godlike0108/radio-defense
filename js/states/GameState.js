@@ -97,9 +97,11 @@ SpaceShip.GameState = {
       this.bulletTimer.pause()
     }
 
-    // bullet and enemy collision detection
     this.ENEMY_GROUP.forEach(type => {
+      // bullet and enemy collision detection
       this.game.physics.arcade.overlap(this[type], this.playerBullets, this.damageEnemy, null, this)
+      // shield ane enemy collision detection
+      this.game.physics.arcade.overlap(this.playerShield, this[type], this.killEnemy, null, this)
     })
 
   },
@@ -176,6 +178,10 @@ SpaceShip.GameState = {
   damageEnemy (enemy, bullet) {
     enemy.damage(1)
     bullet.kill()
+  },
+
+  killEnemy (shield, enemy) {
+    enemy.damage(1000)
   },
 
   loadLevel () {
