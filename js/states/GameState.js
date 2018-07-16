@@ -9,9 +9,12 @@ SpaceShip.GameState = {
     this.GUN_DIS = 90
     this.SHIELD_DIS = 100
     this.SHIELD_RNG = 60
-    this.SHIELD_RNG_BIG = 180
     this.BULLET_SPEED = 500
     this.SHOOT_SPEED = Phaser.Timer.SECOND/5*2
+
+    // player boosts
+    this.SHIELD_RNG_BIG = 180
+    this.SHIELD_BOOST_TIME = 10
 
     // enemy settings
     // enemy player distance
@@ -229,10 +232,18 @@ SpaceShip.GameState = {
   playerBoost(boxType) {
     switch(boxType) {
       case 'shield':
-        this.playerShield.kill()
-        this.playerBigShield.revive()
+        this.shieldBoost()
         break
     }
+  },
+
+  shieldBoost() {
+    this.playerShield.kill()
+    this.playerBigShield.revive()
+    this.game.time.events.add(Phaser.Timer.SECOND*this.SHIELD_BOOST_TIME, function() {
+      this.playerShield.revive()
+      this.playerBigShield.kill()
+    }, this)
   },
 
   damageEnemy (enemy, bullet) {
