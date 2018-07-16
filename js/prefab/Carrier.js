@@ -19,6 +19,9 @@ SpaceShip.Carrier = class Carrier extends SpaceShip.Enemy {
     this.BROKE_DIS_MAX = 120
     this.BROKE_ANG_MIN = 110
     this.BROKE_ANG_MAX = 160
+    // speeded jets
+    this.id = this.game.rnd.uuid()
+    this.JET_FULLSPEED = 100
     this.scheduleCreateJet()
   }
 
@@ -28,9 +31,22 @@ SpaceShip.Carrier = class Carrier extends SpaceShip.Enemy {
 
   damage (amount) {
     super.damage(amount)
+    // shoot first of my lived jets
+    this.shootExistJet()
 
     if (this.health <= 0) {
       this.enemyTimer.pause()
+    }
+  }
+
+  shootExistJet () {
+    let pickedJet = this.jets.filter(jet => {
+      console.log(this.id, jet.carrierId)
+      return jet.carrierId === this.id && jet.exists && !jet.speedUp
+    }).first
+    if(pickedJet) {
+      pickedJet.speed = this.JET_FULLSPEED
+      pickedJet.speedUp = true
     }
   }
 
@@ -59,10 +75,10 @@ SpaceShip.Carrier = class Carrier extends SpaceShip.Enemy {
     let jet = this.jets.getFirstExists(false)
 
     if(!jet) {
-      jet = new SpaceShip.Jet(this.game, this.x, this.y, this.speed, this.target)
+      jet = new SpaceShip.Jet(this.game, this.x, this.y, this.speed, this.target, this.id)
       this.jets.add(jet)
     } else {
-      jet.reset(this.x, this.y)
+      jet.reset(this.x, this.y, this.id, this.speed)
     }
 
     let rndDis = this.game.rnd.between(this.BROKE_DIS_MIN, this.BROKE_DIS_MAX)
