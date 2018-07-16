@@ -1,14 +1,15 @@
 var SpaceShip = SpaceShip || {}
 
 SpaceShip.UFO = class UFO extends SpaceShip.Enemy {
-  constructor (game, x, y, speed, target) {
+  constructor (game, x, y, speed, target, bullets) {
     super(game, x, y, speed, target)
     this.ANG_VEL = 0.1
     this.BULLET_SPEED = 50
     this.health = 3
     this.loadTexture(SpaceShip.UFOTexture(game))
 
-    // turret setting
+    // shoot setting
+    this.bullets = bullets
     this.TURRET_DIS = 30
     this.turretPos = new Phaser.Point(this.x + this.TURRET_DIS ,this.y).rotate(this.x, this.y, this.position.angle(this.target, true), true)
     this.enemyTimer = this.game.time.create(false)

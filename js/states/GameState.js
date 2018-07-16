@@ -14,6 +14,7 @@ SpaceShip.GameState = {
     // enemy settings
     // enemy player distance
     this.ENEMY_GROUP = ['UFOs', 'meteors', 'carriers', 'smallmeteors', 'jets']
+    this.ENEMY_BULLETS = ['UFOBullets', 'CarrierBullets']
     this.ENEMY_DIS = this.CENTER.distance(new Phaser.Point(0, 0))
     this.ENEMY_SPEED = 20
 
@@ -67,6 +68,7 @@ SpaceShip.GameState = {
 
     // create enemies
     this.initEnemies()
+    this.initEnemyBullets()
 
     this.loadLevel()
   },
@@ -104,8 +106,14 @@ SpaceShip.GameState = {
       this.game.physics.arcade.overlap(this.playerShield, this[type], this.killEnemy, null, this)
     })
 
+    this.ENEMY_BULLETS.forEach(type => {
+      // enemy bullet and shield
+      this.game.physics.arcade.overlap(this.playerShield, this[type], this.killBullets, null, this)
+    })
+
   },
 
+  // custom
   initPlayerBullets () {
     this.playerBullets = this.add.group()
     this.playerBullets.enableBody = true
@@ -133,6 +141,13 @@ SpaceShip.GameState = {
     })
   },
 
+  initEnemyBullets () {
+    this.ENEMY_BULLETS.forEach(type => {
+      this[type] = this.add.group()
+      this[type].enableBody = true
+    })
+  },
+
   createUFO () {
     let ufo = this.UFOs.getFirstExists(false)
     // 隨機決定位置
@@ -140,7 +155,7 @@ SpaceShip.GameState = {
     let position = new Phaser.Point(this.playerCore.x+this.ENEMY_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
 
     if(!ufo) {
-      ufo = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore)
+      ufo = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.UFOBullets)
       this.UFOs.add(ufo)
     } else {
       ufo.reset(position.x, position.y)
@@ -168,7 +183,7 @@ SpaceShip.GameState = {
     let position = new Phaser.Point(this.playerCore.x+this.ENEMY_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
 
     if(!carrier) {
-      carrier = new SpaceShip.Carrier(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.jets)
+      carrier = new SpaceShip.Carrier(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.jets, this.CarrierBullets)
       this.carriers.add(carrier)
     } else {
       carrier.reset(position.x, position.y)
@@ -184,13 +199,14 @@ SpaceShip.GameState = {
     enemy.damage(1000)
   },
 
+  killBullets (shield, bullet) {
+    bullet.kill()
+  },
+
   loadLevel () {
     this.currentEnemyIndex = 0
-
     this.levelData = JSON.parse(this.game.cache.getText(`lv1`))
-
     this.scheduleNextEnemy()
-
   },
 
   scheduleNextEnemy () {

@@ -1,13 +1,14 @@
 var SpaceShip = SpaceShip || {}
 
 SpaceShip.Carrier = class Carrier extends SpaceShip.Enemy {
-  constructor (game, x, y, speed, target, group) {
+  constructor (game, x, y, speed, target, group, bullets) {
     super(game, x, y, speed, target)
     this.health = 4
     this.loadTexture(SpaceShip.CarrierTexture(game))
     this.angle = this.position.angle(this.target, true)
 
     // shooting
+    this.bullets = bullets
     this.BULLET_SPEED = 80
     this.enemyTimer = this.game.time.create(false)
     this.enemyTimer.start()
