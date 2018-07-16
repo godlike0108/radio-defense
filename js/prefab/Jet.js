@@ -1,8 +1,8 @@
 var SpaceShip = SpaceShip || {}
 
 SpaceShip.Jet = class Jet extends SpaceShip.Enemy {
-  constructor (game, x, y, speed, target, carrierId) {
-    super(game, x, y, speed, target)
+  constructor (game, x, y, speed, target, itemBoxes, carrierId) {
+    super(game, x, y, speed, target, itemBoxes)
     this.carrierId = carrierId
     this.speedUp = false
     this.health = 1

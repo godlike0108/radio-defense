@@ -1,8 +1,8 @@
 var SpaceShip = SpaceShip || {}
 
 SpaceShip.Carrier = class Carrier extends SpaceShip.Enemy {
-  constructor (game, x, y, speed, target, group, bullets) {
-    super(game, x, y, speed, target)
+  constructor (game, x, y, speed, target, itemBoxes, group, bullets) {
+    super(game, x, y, speed, target, itemBoxes)
     this.health = 4
     this.loadTexture(SpaceShip.CarrierTexture(game))
     this.angle = this.position.angle(this.target, true)
@@ -42,7 +42,6 @@ SpaceShip.Carrier = class Carrier extends SpaceShip.Enemy {
 
   shootExistJet () {
     let pickedJet = this.jets.filter(jet => {
-      console.log(this.id, jet.carrierId)
       return jet.carrierId === this.id && jet.exists && !jet.speedUp
     }).first
     if(pickedJet) {
@@ -76,7 +75,7 @@ SpaceShip.Carrier = class Carrier extends SpaceShip.Enemy {
     let jet = this.jets.getFirstExists(false)
 
     if(!jet) {
-      jet = new SpaceShip.Jet(this.game, this.x, this.y, this.speed, this.target, this.id)
+      jet = new SpaceShip.Jet(this.game, this.x, this.y, this.speed, this.target, this.itemBoxes, this.id)
       this.jets.add(jet)
     } else {
       jet.reset(this.x, this.y, this.id, this.speed)

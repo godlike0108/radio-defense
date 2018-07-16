@@ -1,8 +1,8 @@
 var SpaceShip = SpaceShip || {}
 
 SpaceShip.UFO = class UFO extends SpaceShip.Enemy {
-  constructor (game, x, y, speed, target, bullets) {
-    super(game, x, y, speed, target)
+  constructor (game, x, y, speed, target, itemBoxes, bullets) {
+    super(game, x, y, speed, target, itemBoxes)
     this.ANG_VEL = 0.1
     this.BULLET_SPEED = 50
     this.health = 3

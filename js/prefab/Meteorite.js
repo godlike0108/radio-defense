@@ -1,8 +1,8 @@
 var SpaceShip = SpaceShip || {}
 
 SpaceShip.Meteorite = class Meteorite extends SpaceShip.Enemy {
-  constructor (game, x, y, speed, target, group) {
-    super(game, x, y, speed, target)
+  constructor (game, x, y, speed, target, itemBoxes, group) {
+    super(game, x, y, speed, target, itemBoxes)
     this.health = 1
     this.loadTexture(SpaceShip.MeteoriteTexture(game))
 
@@ -19,7 +19,7 @@ SpaceShip.Meteorite = class Meteorite extends SpaceShip.Enemy {
       let fracture = this.fractures.getFirstExists(false)
 
       if(!fracture) {
-        fracture = new SpaceShip.SmallMeteorite(this.game, this.x, this.y, this.speed, this.target)
+        fracture = new SpaceShip.SmallMeteorite(this.game, this.x, this.y, this.speed, this.target, this.itemBoxes)
         this.fractures.add(fracture)
       } else {
         fracture.reset(this.x, this.y)

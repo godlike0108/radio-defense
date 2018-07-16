@@ -33,6 +33,8 @@ SpaceShip.GameState = {
     this.UFOBulletTexture = SpaceShip.UFOBulletTexture(this.game)
     this.MeteoriteTexture = SpaceShip.MeteoriteTexture(this.game)
     this.CarrierTexture = SpaceShip.CarrierTexture(this.game)
+    // item texture
+    this.load.image('itemBox', 'assets/box.png')
 
     // level data
     this.load.text('lv1', 'data/level/1.json')
@@ -70,6 +72,9 @@ SpaceShip.GameState = {
     this.initEnemies()
     this.initEnemyBullets()
 
+    // create itemBoxes
+    this.initItemBoxes()
+
     this.loadLevel()
   },
 
@@ -106,11 +111,13 @@ SpaceShip.GameState = {
       this.game.physics.arcade.overlap(this.playerShield, this[type], this.killEnemy, null, this)
     })
 
+    // enemy bullet and shield
     this.ENEMY_BULLETS.forEach(type => {
-      // enemy bullet and shield
       this.game.physics.arcade.overlap(this.playerShield, this[type], this.killBullets, null, this)
     })
 
+    // itemBoxes and playerBullets collision
+    this.game.physics.arcade.overlap(this.itemBoxes, this.playerBullets, this.playerBoost, null, this)
   },
 
   // custom
@@ -155,7 +162,7 @@ SpaceShip.GameState = {
     let position = new Phaser.Point(this.playerCore.x+this.ENEMY_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
 
     if(!ufo) {
-      ufo = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.UFOBullets)
+      ufo = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.itemBoxes, this.UFOBullets)
       this.UFOs.add(ufo)
     } else {
       ufo.reset(position.x, position.y)
@@ -169,7 +176,7 @@ SpaceShip.GameState = {
     let position = new Phaser.Point(this.playerCore.x+this.ENEMY_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
 
     if(!meteor) {
-      meteor = new SpaceShip.Meteorite(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.smallmeteors)
+      meteor = new SpaceShip.Meteorite(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.itemBoxes, this.smallmeteors)
       this.meteors.add(meteor)
     } else {
       meteor.reset(position.x, position.y)
@@ -183,11 +190,22 @@ SpaceShip.GameState = {
     let position = new Phaser.Point(this.playerCore.x+this.ENEMY_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
 
     if(!carrier) {
-      carrier = new SpaceShip.Carrier(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.jets, this.CarrierBullets)
+      carrier = new SpaceShip.Carrier(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.itemBoxes, this.jets, this.CarrierBullets)
       this.carriers.add(carrier)
     } else {
       carrier.reset(position.x, position.y)
     }
+  },
+
+  initItemBoxes () {
+    this.itemBoxes = this.add.group()
+    this.itemBoxes.enableBody = true
+  },
+
+  playerBoost (itemBox, bullet) {
+    // player boost
+    bullet.kill()
+    itemBox.kill()
   },
 
   damageEnemy (enemy, bullet) {
