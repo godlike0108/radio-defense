@@ -14,7 +14,7 @@ SpaceShip.GameState = {
     // enemy settings
     // enemy player distance
     this.ENEMY_DIS = this.CENTER.distance(new Phaser.Point(0, 0))
-    this.ENEMY_SPEED = 10
+    this.ENEMY_SPEED = 20
 
     // start physic engine
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -132,7 +132,7 @@ SpaceShip.GameState = {
 
     // 隨機決定位置
     let angle = this.game.rnd.angle()
-    let position = new Phaser.Point(this.playerCore.x + 300, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
+    let position = new Phaser.Point(this.playerCore.x+this.ENEMY_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
 
     if(!enemy || enemy.type !== type) {
       switch(type) {
@@ -140,7 +140,7 @@ SpaceShip.GameState = {
           enemy = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type, this.enemyBullets, this.UFOBulletTexture)
           break
         case 'meteor':
-          enemy = enemy = new SpaceShip.Meteorite(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type)
+          enemy = enemy = new SpaceShip.Meteorite(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type, this.enemies)
           break
         case 'carrier':
           enemy = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, type, this.enemyBullets, this.UFOBulletTexture)

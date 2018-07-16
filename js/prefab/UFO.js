@@ -8,7 +8,6 @@ SpaceShip.UFO = class UFO extends SpaceShip.Enemy {
     this.bullets = enemyBullets
     this.bulletTexture = bulletTexture
     this.health = 3
-    console.log(this.health)
     this.loadTexture(SpaceShip.UFOTexture(game))
 
     // turret setting
