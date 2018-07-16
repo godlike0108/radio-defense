@@ -7,7 +7,9 @@ SpaceShip.GameState = {
     this.ANG_VEL = 2
     this.ANG_TOL = this.game.math.degToRad(6) // 在此角度區間為靜止
     this.GUN_DIS = 90
-    this.SHIELD_DIS = 90
+    this.SHIELD_DIS = 100
+    this.SHIELD_RNG = 60
+    this.SHIELD_RNG_BIG = 180
     this.BULLET_SPEED = 500
     this.SHOOT_SPEED = Phaser.Timer.SECOND/5*2
 
@@ -25,7 +27,8 @@ SpaceShip.GameState = {
   preload () {
     this.playerCoreTexture = SpaceShip.PlayerCoreTexture(this.game)
     this.playerTexture = SpaceShip.PlayerTexture(this.game)
-    this.playerShieldTexture = SpaceShip.PlayerShieldTexture(this.game)
+    this.playerShieldTexture = SpaceShip.PlayerShieldTexture(this.game, this.SHIELD_RNG)
+    this.playerBigShieldTexture = SpaceShip.PlayerShieldTexture(this.game, this.SHIELD_RNG_BIG)
     this.playerGunTexture = SpaceShip.PlayerGunTexture(this.game)
     this.playerBulletTexture = SpaceShip.PlayerBulletTexture(this.game)
     // enemy textures
@@ -53,8 +56,14 @@ SpaceShip.GameState = {
 
     // create player shield
     this.playerShield = this.game.add.sprite(this.CENTER.x - this.SHIELD_DIS, this.CENTER.y, this.playerShieldTexture)
-    this.playerShield.anchor.setTo(0.5)
+    this.playerShield.anchor.setTo(0, 0.5)
     this.game.physics.arcade.enable(this.playerShield)
+
+    // create player big shield and hide
+    this.playerBigShield = this.game.add.sprite(this.CENTER.x - this.SHIELD_DIS, this.CENTER.y, this.playerBigShieldTexture)
+    this.playerBigShield.anchor.setTo(0, 0.5)
+    this.game.physics.arcade.enable(this.playerBigShield)
+    this.playerBigShield.kill()
 
     // create player gun
     this.playerGun = this.game.add.sprite(this.playerCore.x + this.GUN_DIS, this.playerCore.y, this.playerGunTexture)
@@ -89,12 +98,16 @@ SpaceShip.GameState = {
 
       this.playerShield.angle = this.playerGun.angle
       this.playerShield.position.rotate(this.playerCore.x, this.playerCore.y, this.ANG_VEL, true)
+      this.playerBigShield.angle = this.playerGun.angle
+      this.playerBigShield.position.rotate(this.playerCore.x, this.playerCore.y, this.ANG_VEL, true)
     } else if (pointerAngle - playerGunAngle < -this.ANG_TOL/2 && pointerAngle - playerGunAngle <= Math.PI || pointerAngle - playerGunAngle > 0 && pointerAngle - playerGunAngle > Math.PI) {
       this.playerGun.angle -= this.ANG_VEL
       this.playerGun.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
 
       this.playerShield.angle = this.playerGun.angle
       this.playerShield.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
+      this.playerBigShield.angle = this.playerGun.angle
+      this.playerBigShield.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
     }
 
     // press W to shoot
@@ -109,15 +122,19 @@ SpaceShip.GameState = {
       this.game.physics.arcade.overlap(this[type], this.playerBullets, this.damageEnemy, null, this)
       // shield ane enemy collision detection
       this.game.physics.arcade.overlap(this.playerShield, this[type], this.killEnemy, null, this)
+      this.game.physics.arcade.overlap(this.playerBigShield, this[type], this.killEnemy, null, this)
     })
 
     // enemy bullet and shield
     this.ENEMY_BULLETS.forEach(type => {
       this.game.physics.arcade.overlap(this.playerShield, this[type], this.killBullets, null, this)
     })
+    this.ENEMY_BULLETS.forEach(type => {
+      this.game.physics.arcade.overlap(this.playerBigShield, this[type], this.killBullets, null, this)
+    })
 
     // itemBoxes and playerBullets collision
-    this.game.physics.arcade.overlap(this.itemBoxes, this.playerBullets, this.playerBoost, null, this)
+    this.game.physics.arcade.overlap(this.itemBoxes, this.playerBullets, this.eatItemBox, null, this)
   },
 
   // custom
@@ -202,10 +219,20 @@ SpaceShip.GameState = {
     this.itemBoxes.enableBody = true
   },
 
-  playerBoost (itemBox, bullet) {
-    // player boost
+  eatItemBox (itemBox, bullet) {
     bullet.kill()
     itemBox.kill()
+    // player boost
+    this.playerBoost(itemBox.type)
+  },
+
+  playerBoost(boxType) {
+    switch(boxType) {
+      case 'shield':
+        this.playerShield.kill()
+        this.playerBigShield.revive()
+        break
+    }
   },
 
   damageEnemy (enemy, bullet) {
