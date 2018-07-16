@@ -1,7 +1,7 @@
 var SpaceShip = SpaceShip || {}
 
-SpaceShip.UFOBulletTexture = function () {
-  let UFOBulletTexture = this.game.add.graphics()
+SpaceShip.UFOBulletTexture = function (game) {
+  let UFOBulletTexture = game.add.graphics()
   let center = 10
   let radius = 5
 

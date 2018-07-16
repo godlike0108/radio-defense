@@ -1,8 +1,8 @@
 var SpaceShip = SpaceShip || {}
 
-SpaceShip.UFOTexture = function () {
+SpaceShip.UFOTexture = function (game) {
   // player position
-  let UFOTexture = this.game.add.graphics()
+  let UFOTexture = game.add.graphics()
   let center = new Phaser.Point(30, 30)
   let radius = 30
   let lineEnd = new Phaser.Point(center.x, center.y - radius)

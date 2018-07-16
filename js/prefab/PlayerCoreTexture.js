@@ -1,8 +1,8 @@
 var SpaceShip = SpaceShip || {}
 
-SpaceShip.PlayerCoreTexture = function () {
+SpaceShip.PlayerCoreTexture = function (game) {
   // player position
-  let coreTexture = this.game.add.graphics()
+  let coreTexture = game.add.graphics()
   let center = new Phaser.Point(50, 50)
   let radius = 50
   let lineEnd = new Phaser.Point(center.x, center.y - radius)

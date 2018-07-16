@@ -14,18 +14,18 @@ SpaceShip.GameState = {
     // enemy settings
     // enemy player distance
     this.ENEMY_DIS = this.CENTER.distance(new Phaser.Point(0, 0))
-    this.ENEMY_SPEED = 20
+    this.ENEMY_SPEED = 10
     this.ENEMY_TYPE = {
       'ufo': {
-        texture: SpaceShip.UFOTexture(),
+        texture: SpaceShip.UFOTexture,
         health: 3,
       },
       'meteor': {
-        texture: SpaceShip.UFOTexture(),
+        texture: SpaceShip.MeteoriteTexture,
         health: 2,
       },
       'carrier': {
-        texture: SpaceShip.UFOTexture(),
+        texture: SpaceShip.UFOTexture,
         health: 4,
       }
     }
@@ -35,13 +35,13 @@ SpaceShip.GameState = {
   },
 
   preload () {
-    this.playerCoreTexture = SpaceShip.PlayerCoreTexture()
-    this.playerTexture = SpaceShip.PlayerTexture()
-    this.playerShieldTexture = SpaceShip.PlayerShieldTexture()
-    this.playerGunTexture = SpaceShip.PlayerGunTexture()
-    this.playerBulletTexture = SpaceShip.PlayerBulletTexture()
+    this.playerCoreTexture = SpaceShip.PlayerCoreTexture(this.game)
+    this.playerTexture = SpaceShip.PlayerTexture(this.game)
+    this.playerShieldTexture = SpaceShip.PlayerShieldTexture(this.game)
+    this.playerGunTexture = SpaceShip.PlayerGunTexture(this.game)
+    this.playerBulletTexture = SpaceShip.PlayerBulletTexture(this.game)
     // enemy textures
-    this.UFOBulletTexture = SpaceShip.UFOBulletTexture()
+    this.UFOBulletTexture = SpaceShip.UFOBulletTexture(this.game)
 
     // level data
     this.load.text('lv1', 'data/level/1.json')
@@ -77,6 +77,8 @@ SpaceShip.GameState = {
 
     // create enemies
     this.initEnemies()
+
+    this.met = this.game.add.sprite(300, 300, this.ENEMY_TYPE['meteor'].texture(this.game))
 
     // create enemy bullets
     this.initEnemyBullets()
@@ -147,11 +149,21 @@ SpaceShip.GameState = {
     let position = new Phaser.Point(this.playerCore.x + 300, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
     
     // 決定敵人種類
-    let texture = this.ENEMY_TYPE[type].texture
+    let texture = this.ENEMY_TYPE[type].texture(this.game)
+    console.log(texture)
     let health = this.ENEMY_TYPE[type].health
 
     if(!enemy) {
-      enemy = new SpaceShip.UFO(this.game, position.x, position.y, texture, health, this.ENEMY_SPEED, this.playerCore, this.enemyBullets, this.UFOBulletTexture)
+      switch(type) {
+        case 'ufo':
+          enemy = new SpaceShip.UFO(this.game, position.x, position.y, texture, health, this.ENEMY_SPEED, this.playerCore, this.enemyBullets, this.UFOBulletTexture)
+          break
+        case 'meteor':
+          enemy = enemy = new SpaceShip.Meteorite(this.game, position.x, position.y, texture, health, this.ENEMY_SPEED, this.playerCore)
+          break
+        case 'carrier':
+          enemy = new SpaceShip.UFO(this.game, position.x, position.y, texture, health, this.ENEMY_SPEED, this.playerCore, this.enemyBullets, this.UFOBulletTexture)
+      }
       this.enemies.add(enemy)
     }
     enemy.reset(position.x, position.y, health, texture)

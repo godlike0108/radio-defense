@@ -1,8 +1,8 @@
 var SpaceShip = SpaceShip || {}
 
-SpaceShip.PlayerBulletTexture = function () {
+SpaceShip.PlayerBulletTexture = function (game) {
   // player position
-  let playerBulletTexture = this.game.add.graphics()
+  let playerBulletTexture = game.add.graphics()
   let center = new Phaser.Point(100, 100)
   let path = [0,0, 0,6, 10,6, 15,3, 10,0, 0,0]
 

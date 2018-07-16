@@ -1,8 +1,8 @@
 var SpaceShip = SpaceShip || {}
 
-SpaceShip.PlayerGunTexture = function () {
+SpaceShip.PlayerGunTexture = function (game) {
   // player position
-  let playerGunTexture = this.game.add.graphics()
+  let playerGunTexture = game.add.graphics()
   let center = new Phaser.Point(100, 100)
   let path = [0,30, 20,30, 50,20, 50,10, 20,0, 0,0, 0,30]
 
