@@ -18,6 +18,7 @@ SpaceShip.GameState = {
     // player boosts
     this.SHIELD_RNG_BIG = 180
     this.SHIELD_BOOST_TIME = 10
+    this.DOUBLE_GUN_DIS = 30
 
     // enemy settings
     // enemy player distance
@@ -36,9 +37,11 @@ SpaceShip.GameState = {
     this.playerCoreTexture = SpaceShip.PlayerCoreTexture(this.game)
     this.playerTexture = SpaceShip.PlayerTexture(this.game)
     this.playerShieldTexture = SpaceShip.PlayerShieldTexture(this.game, this.SHIELD_RNG)
-    this.playerBigShieldTexture = SpaceShip.PlayerShieldTexture(this.game, this.SHIELD_RNG_BIG)
     this.playerGunTexture = SpaceShip.PlayerGunTexture(this.game)
     this.playerBulletTexture = SpaceShip.PlayerBulletTexture(this.game)
+    // player boost texture
+    this.BigShieldTexture = SpaceShip.PlayerShieldTexture(this.game, this.SHIELD_RNG_BIG)
+    this.DoubleGunTexture = SpaceShip.DoubleGunTexture(this.game)
     // enemy textures
     this.UFOTexture = SpaceShip.UFOTexture(this.game)
     this.UFOBulletTexture = SpaceShip.UFOBulletTexture(this.game)
@@ -72,7 +75,7 @@ SpaceShip.GameState = {
     this.game.physics.arcade.enable(this.playerShield)
 
     // create player big shield and hide
-    this.playerBigShield = this.game.add.sprite(this.CENTER.x - this.SHIELD_DIS, this.CENTER.y, this.playerBigShieldTexture)
+    this.playerBigShield = this.game.add.sprite(this.CENTER.x - this.SHIELD_DIS, this.CENTER.y, this.BigShieldTexture)
     this.playerBigShield.anchor.setTo(0, 0.5)
     this.game.physics.arcade.enable(this.playerBigShield)
     this.playerBigShield.kill()
@@ -81,7 +84,12 @@ SpaceShip.GameState = {
     this.playerGun = this.game.add.sprite(this.playerCore.x + this.GUN_DIS, this.playerCore.y, this.playerGunTexture)
     this.playerGun.anchor.setTo(0.5)
     this.playerGun.scale.setTo(0.8)
-    this.game.physics.arcade.enable(this.playerGun)
+
+    // create player double gun
+    this.playerDoubleGun = this.game.add.sprite(this.playerCore.x + this.GUN_DIS, this.playerCore.y, this.DoubleGunTexture)
+    this.playerDoubleGun.anchor.setTo(0.5)
+    this.playerDoubleGun.scale.setTo(0.8)
+    this.playerDoubleGun.kill()
 
     // create player bullet
     this.initPlayerBullets()
@@ -110,6 +118,8 @@ SpaceShip.GameState = {
     if (pointerAngle - playerGunAngle > this.ANG_TOL/2 && pointerAngle - playerGunAngle <= Math.PI || pointerAngle - playerGunAngle < 0 && pointerAngle - playerGunAngle < -Math.PI) {
       this.playerGun.angle += this.ANG_VEL
       this.playerGun.position.rotate(this.playerCore.x, this.playerCore.y, this.ANG_VEL, true)
+      this.playerDoubleGun.angle += this.ANG_VEL
+      this.playerDoubleGun.position.rotate(this.playerCore.x, this.playerCore.y, this.ANG_VEL, true)
 
       this.playerShield.angle = this.playerGun.angle
       this.playerShield.position.rotate(this.playerCore.x, this.playerCore.y, this.ANG_VEL, true)
@@ -118,6 +128,8 @@ SpaceShip.GameState = {
     } else if (pointerAngle - playerGunAngle < -this.ANG_TOL/2 && pointerAngle - playerGunAngle <= Math.PI || pointerAngle - playerGunAngle > 0 && pointerAngle - playerGunAngle > Math.PI) {
       this.playerGun.angle -= this.ANG_VEL
       this.playerGun.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
+      this.playerDoubleGun.angle -= this.ANG_VEL
+      this.playerDoubleGun.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
 
       this.playerShield.angle = this.playerGun.angle
       this.playerShield.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
@@ -161,18 +173,40 @@ SpaceShip.GameState = {
   },
 
   createPlayerBullet () {
-    let bullet = this.playerBullets.getFirstExists(false)
-
-    if(!bullet) {
-      bullet = new SpaceShip.PlayerBullet(this.game, this.playerGun.x, this.playerGun.y, this.playerBulletTexture)
-      this.playerBullets.add(bullet)
-    } else {
-      // reset position
-      bullet.reset(this.playerGun.x, this.playerGun.y)
+    if(this.playerGun.exists) {
+      let bullet = this.playerBullets.getFirstExists(false)
+      if(!bullet) {
+        bullet = new SpaceShip.PlayerBullet(this.game, this.playerGun.x, this.playerGun.y, this.playerBulletTexture)
+        this.playerBullets.add(bullet)
+      } else {
+        // reset position
+        bullet.reset(this.playerGun.x, this.playerGun.y)
+      }
+      // set velocity
+      this.game.physics.arcade.velocityFromRotation(this.playerGun.rotation, this.BULLET_SPEED, bullet.body.velocity)
+      bullet.rotation = this.playerGun.rotation
     }
-    // set velocity
-    this.game.physics.arcade.velocityFromRotation(this.playerGun.rotation, this.BULLET_SPEED, bullet.body.velocity)
-    bullet.rotation = this.playerGun.rotation
+
+    if(this.playerDoubleGun.exists) {
+      let dir = this.playerDoubleGun.position.clone().rperp().normalize().multiply(15, 15)
+      let gunPoints = [
+        this.playerDoubleGun.position.clone().add(dir.x, dir.y),
+        this.playerDoubleGun.position.clone().subtract(dir.x, dir.y)
+      ]
+      for(let i=0; i<gunPoints.length; i++) {
+        let bullet = this.playerBullets.getFirstExists(false)
+        if(!bullet) {
+          bullet = new SpaceShip.PlayerBullet(this.game, gunPoints[i].x, gunPoints[i].y, this.playerBulletTexture)
+          this.playerBullets.add(bullet)
+        } else {
+          // reset position
+          bullet.reset(gunPoints[i].x, gunPoints[i].y)
+        }
+        // set velocity
+        this.game.physics.arcade.velocityFromRotation(this.playerDoubleGun.rotation, this.BULLET_SPEED, bullet.body.velocity)
+        bullet.rotation = this.playerDoubleGun.rotation
+      }
+    }
   },
 
   initEnemies () {
@@ -250,6 +284,10 @@ SpaceShip.GameState = {
         break
       case 'heart':
         this.healHeart()
+        break
+      case 'double':
+        this.doubleGunBoost()
+        break
     }
   },
 
@@ -259,6 +297,15 @@ SpaceShip.GameState = {
     this.game.time.events.add(Phaser.Timer.SECOND*this.SHIELD_BOOST_TIME, function() {
       this.playerShield.revive()
       this.playerBigShield.kill()
+    }, this)
+  },
+
+  doubleGunBoost() {
+    this.playerGun.kill()
+    this.playerDoubleGun.revive()
+    this.game.time.events.add(Phaser.Timer.SECOND*this.GUN_BOOST_TIME, function() {
+      this.playerGun.revive()
+      this.playerDoubleGun.kill()
     }, this)
   },
 
