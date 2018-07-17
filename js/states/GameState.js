@@ -13,6 +13,7 @@ SpaceShip.GameState = {
     this.SHOOT_SPEED = Phaser.Timer.SECOND/5*2
     this.PLAYER_HEALTH = 3
     this.PLAYER_ENDUR = 1
+    this.ENDUR_RECOVER_RATE = 1
 
     // player boosts
     this.SHIELD_RNG_BIG = 180
@@ -366,8 +367,11 @@ SpaceShip.GameState = {
 
     this.currentEndur = this.PLAYER_ENDUR
     // init recover timer
-    this.game.time.events.add(100, () => {
-
+    this.game.time.events.loop(this.ENDUR_RECOVER_RATE*Phaser.Timer.SECOND, () => {
+      if(this.currentEndur < 1) {
+        this.currentEndur += 0.01
+        this.endurance.scale.x = this.currentEndur
+      }
     }, this)
   },
 
