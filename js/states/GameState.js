@@ -56,7 +56,12 @@ SpaceShip.GameState = {
     this.MeteoriteTexture = SpaceShip.MeteoriteTexture(this.game)
     this.CarrierTexture = SpaceShip.CarrierTexture(this.game)
     // item texture
-    this.load.image('itemBox', 'assets/box.png')
+    this.load.image('itemDouble', 'assets/item-double.png')
+    this.load.image('itemHeart', 'assets/item-heart.png')
+    this.load.image('itemLaser', 'assets/item-laser.png')
+    this.load.image('itemUlt', 'assets/item-ult.png')
+    this.load.image('itemShield', 'assets/item-shield.png')
+    this.load.image('itemWave', 'assets/item-wave.png')
 
     // UI texture
     this.load.image('heart', 'assets/heart.png')
@@ -340,21 +345,23 @@ SpaceShip.GameState = {
 
   playerBoost(boxType) {
     switch(boxType) {
-      case 'shield':
+      case 'itemShield':
         this.shieldBoost()
         break
-      case 'heart':
+      case 'itemHeart':
         this.healHeart()
         break
-      case 'double':
+      case 'itemDouble':
         this.doubleGunBoost()
         break
-      case 'ult':
+      case 'itemUlt':
         this.releaseUlt()
         break
-      case 'laser':
+      case 'itemLaser':
         this.laserBoost()
         break
+      case 'itemWave':
+        this.waveBoost()
     }
   },
 
@@ -393,6 +400,10 @@ SpaceShip.GameState = {
     this.game.time.events.add(this.LASER_BOOST_TIME, function() {
       this.weaponMode = 'bullet'
     }, this)
+  },
+
+  waveBoost() {
+    console.log('wave')
   },
 
   damageEnemy (enemy, bullet) {
