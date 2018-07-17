@@ -12,6 +12,7 @@ SpaceShip.GameState = {
     this.BULLET_SPEED = 500
     this.SHOOT_SPEED = Phaser.Timer.SECOND/5*2
     this.PLAYER_HEALTH = 3
+    this.PLAYER_ENDUR = 1
 
     // player boosts
     this.SHIELD_RNG_BIG = 180
@@ -23,6 +24,7 @@ SpaceShip.GameState = {
     this.ENEMY_BULLETS = ['UFOBullets', 'CarrierBullets']
     this.ENEMY_DIS = this.CENTER.distance(new Phaser.Point(0, 0))
     this.ENEMY_SPEED = 20
+    this.ENEMY_DAMAGE = 0.34
 
     // start physic engine
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -273,10 +275,32 @@ SpaceShip.GameState = {
 
   damagePlayer(playerCore, enemyThings) {
     enemyThings.kill()
-    // player get damage
-    playerCore.damage(1)
-    if(playerCore.health >= 0) {
+    // damage player endurance
+    if(this.currentEndur > this.ENEMY_DAMAGE) {
+      this.currentEndur -= this.ENEMY_DAMAGE
+      this.tweenEndur = this.game.add.tween(this.endurance.scale).to({x: this.currentEndur}, Phaser.Timer.SECOND)
+      this.tweenEndur.start()
+    } else if (playerCore.health > 1) {
+      // fill endurance
+      this.currentEndur = this.PLAYER_ENDUR
+      this.tweenEndur = this.game.add.tween(this.endurance.scale).to({x: 0}, Phaser.Timer.SECOND)
+      this.tweenEndur.start()
+      this.tweenEndur.onComplete.addOnce(() => {
+        this.tweenEndur.pause()
+        this.currentEndur = this.PLAYER_ENDUR
+        this.endurance.scale.x = this.currentEndur
+      })
+      this.endurance.scale.x = this.PLAYER_ENDUR
+      // player get damage
+      playerCore.damage(1)
       this.currentPlayerLife[playerCore.health].kill()
+    } else {
+      this.tweenEndur = this.game.add.tween(this.endurance.scale).to({x: 0}, Phaser.Timer.SECOND)
+      this.tweenEndur.start()
+      // player get damage
+      playerCore.damage(1)
+      this.currentPlayerLife[playerCore.health].kill()
+      this.gameOver()
     }
   },
 
@@ -331,7 +355,6 @@ SpaceShip.GameState = {
       heart.scale.setTo(this.HEART_SCALE)
       this.currentPlayerLife.push(heart)
       heartPos.x -= (this.HEART_SPACE + this.HEART_SIZE)
-      console.log(heartPos.x)
     }
   },
 
@@ -340,5 +363,16 @@ SpaceShip.GameState = {
     let endurPos = this.LIFE_INIT_POS.subtract(0, this.HEART_SIZE/2 + this.HEART_SPACE)
     this.endurance = this.game.add.image(endurPos.x, endurPos.y, this.playerEndurTexture)
     this.endurance.anchor.setTo(1, 0)
+
+    this.currentEndur = this.PLAYER_ENDUR
+    // init recover timer
+    this.game.time.events.add(100, () => {
+
+    }, this)
+  },
+
+  // game Over
+  gameOver () {
+    console.log('game over')
   },
 }
