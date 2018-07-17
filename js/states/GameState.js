@@ -14,6 +14,7 @@ SpaceShip.GameState = {
     this.PLAYER_HEART = 3
     this.PLAYER_ENDUR = 1
     this.ENDUR_RECOVER_RATE = 1
+    this.ULT_SPEED = Phaser.Timer.SECOND
 
     // player boosts
     this.SHIELD_RNG_BIG = 180
@@ -24,7 +25,7 @@ SpaceShip.GameState = {
     // enemy player distance
     this.ENEMY_GROUP = ['UFOs', 'meteors', 'carriers', 'smallmeteors', 'jets']
     this.ENEMY_BULLETS = ['UFOBullets', 'CarrierBullets']
-    this.ENEMY_DIS = this.CENTER.distance(new Phaser.Point(0, 0))
+    this.SCREEN_DIS = this.CENTER.distance(new Phaser.Point(0, 0))
     this.ENEMY_SPEED = 20
     this.ENEMY_DAMAGE = 0.34
 
@@ -42,7 +43,8 @@ SpaceShip.GameState = {
     // player boost texture
     this.BigShieldTexture = SpaceShip.PlayerShieldTexture(this.game, this.SHIELD_RNG_BIG)
     this.DoubleGunTexture = SpaceShip.DoubleGunTexture(this.game)
-    // enemy textures
+    this.UltTexture = SpaceShip.UltimateTexture(this.game)
+
     this.UFOTexture = SpaceShip.UFOTexture(this.game)
     this.UFOBulletTexture = SpaceShip.UFOBulletTexture(this.game)
     this.MeteoriteTexture = SpaceShip.MeteoriteTexture(this.game)
@@ -90,6 +92,13 @@ SpaceShip.GameState = {
     this.playerDoubleGun.anchor.setTo(0.5)
     this.playerDoubleGun.scale.setTo(0.8)
     this.playerDoubleGun.kill()
+
+    // create ultimate
+    this.ult = this.game.add.sprite(this.playerCore.x, this.playerCore.y, this.UltTexture)
+    this.ult.anchor.setTo(0.5)
+    this.ult.scale.setTo(0.2)
+    this.game.physics.arcade.enable(this.ult)
+    this.ult.kill()
 
     // create player bullet
     this.initPlayerBullets()
@@ -152,6 +161,8 @@ SpaceShip.GameState = {
       this.game.physics.arcade.overlap(this.playerBigShield, this[type], this.killEnemy, null, this)
       // enemy and player
       this.game.physics.arcade.overlap(this.playerCore, this[type], this.damagePlayer, null, this)
+      // enemy and ult
+      this.game.physics.arcade.overlap(this.ult, this[type], this.killEnemy, null, this)
     })
 
     this.ENEMY_BULLETS.forEach(type => {
@@ -227,7 +238,7 @@ SpaceShip.GameState = {
     let ufo = this.UFOs.getFirstExists(false)
     // 隨機決定位置
     let angle = this.game.rnd.angle()
-    let position = new Phaser.Point(this.playerCore.x+this.ENEMY_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
+    let position = new Phaser.Point(this.playerCore.x+this.SCREEN_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
 
     if(!ufo) {
       ufo = new SpaceShip.UFO(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.itemBoxes, this.UFOBullets)
@@ -241,7 +252,7 @@ SpaceShip.GameState = {
     let meteor = this.meteors.getFirstExists(false)
     // 隨機決定位置
     let angle = this.game.rnd.angle()
-    let position = new Phaser.Point(this.playerCore.x+this.ENEMY_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
+    let position = new Phaser.Point(this.playerCore.x+this.SCREEN_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
 
     if(!meteor) {
       meteor = new SpaceShip.Meteorite(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.itemBoxes, this.smallmeteors)
@@ -255,7 +266,7 @@ SpaceShip.GameState = {
     let carrier = this.carriers.getFirstExists(false)
     // 隨機決定位置
     let angle = this.game.rnd.angle()
-    let position = new Phaser.Point(this.playerCore.x+this.ENEMY_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
+    let position = new Phaser.Point(this.playerCore.x+this.SCREEN_DIS, this.playerCore.y).rotate(this.playerCore.x, this.playerCore.y, angle, true)
 
     if(!carrier) {
       carrier = new SpaceShip.Carrier(this.game, position.x, position.y, this.ENEMY_SPEED, this.playerCore, this.itemBoxes, this.jets, this.CarrierBullets)
@@ -288,6 +299,9 @@ SpaceShip.GameState = {
       case 'double':
         this.doubleGunBoost()
         break
+      case 'ult':
+        this.releaseUlt()
+        break
     }
   },
 
@@ -307,6 +321,16 @@ SpaceShip.GameState = {
       this.playerGun.revive()
       this.playerDoubleGun.kill()
     }, this)
+  },
+
+  releaseUlt() {
+    this.ult.revive()
+    this.tweenUlt = this.game.add.tween(this.ult.scale).to({x: 1, y: 1}, this.ULT_SPEED)
+    this.tweenUlt.start()
+    this.tweenUlt.onComplete.addOnce(() => {
+      this.ult.scale.setTo(0.2)
+      this.ult.kill()
+    })
   },
 
   damageEnemy (enemy, bullet) {
