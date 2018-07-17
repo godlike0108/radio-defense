@@ -11,7 +11,7 @@ SpaceShip.GameState = {
     this.SHIELD_RNG = 60
     this.BULLET_SPEED = 500
     this.SHOOT_SPEED = Phaser.Timer.SECOND/5*2
-    this.PLAYER_HEALTH = 3
+    this.PLAYER_HEART = 3
     this.PLAYER_ENDUR = 1
     this.ENDUR_RECOVER_RATE = 1
 
@@ -61,7 +61,6 @@ SpaceShip.GameState = {
     this.playerCore = this.game.add.sprite(this.CENTER.x, this.CENTER.y, this.playerCoreTexture)
     this.playerCore.anchor.setTo(0.5)
     this.game.physics.arcade.enable(this.playerCore)
-    this.playerCore.health = this.PLAYER_HEALTH
 
     // create player
     this.player = this.game.add.sprite(this.CENTER.x, this.CENTER.y, this.playerTexture)
@@ -249,6 +248,8 @@ SpaceShip.GameState = {
       case 'shield':
         this.shieldBoost()
         break
+      case 'heart':
+        this.healHeart()
     }
   },
 
@@ -281,7 +282,7 @@ SpaceShip.GameState = {
       this.currentEndur -= this.ENEMY_DAMAGE
       this.tweenEndur = this.game.add.tween(this.endurance.scale).to({x: this.currentEndur}, Phaser.Timer.SECOND)
       this.tweenEndur.start()
-    } else if (playerCore.health > 1) {
+    } else if (this.currentHeart > 1) {
       // fill endurance
       this.currentEndur = this.PLAYER_ENDUR
       this.tweenEndur = this.game.add.tween(this.endurance.scale).to({x: 0}, Phaser.Timer.SECOND)
@@ -293,14 +294,12 @@ SpaceShip.GameState = {
       })
       this.endurance.scale.x = this.PLAYER_ENDUR
       // player get damage
-      playerCore.damage(1)
-      this.currentPlayerLife[playerCore.health].kill()
+      this.damageHeart()
     } else {
       this.tweenEndur = this.game.add.tween(this.endurance.scale).to({x: 0}, Phaser.Timer.SECOND)
       this.tweenEndur.start()
       // player get damage
-      playerCore.damage(1)
-      this.currentPlayerLife[playerCore.health].kill()
+      this.damageHeart()
       this.gameOver()
     }
   },
@@ -348,14 +347,30 @@ SpaceShip.GameState = {
     this.HEART_SCALE = 0.5
     this.HEART_SIZE = this.game.cache.getImage('heart').width * this.HEART_SCALE
     this.currentPlayerLife = []
+    this.currentHeart = this.PLAYER_HEART
 
     let heartPos = new Phaser.Point(this.LIFE_INIT_POS.x, this.LIFE_INIT_POS.y)
     // create heart images
-    for(let i = 0; i < this.PLAYER_HEALTH; i++) {
+    for(let i = 0; i < this.PLAYER_HEART; i++) {
       let heart = this.game.add.image(heartPos.x - this.HEART_SIZE, heartPos.y, 'heart')
       heart.scale.setTo(this.HEART_SCALE)
       this.currentPlayerLife.push(heart)
       heartPos.x -= (this.HEART_SPACE + this.HEART_SIZE)
+    }
+  },
+
+  // update hearts
+  damageHeart () {
+    if (this.currentHeart > 0) {
+      this.currentHeart--
+      this.currentPlayerLife[this.currentHeart].kill()
+    }
+  },
+
+  healHeart () {
+    if (this.currentHeart < this.PLAYER_HEART) {
+      this.currentPlayerLife[this.currentHeart].revive()
+      this.currentHeart++
     }
   },
 
