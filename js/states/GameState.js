@@ -27,12 +27,17 @@ SpaceShip.GameState = {
     this.LASER_BOOST_TIME = Phaser.Timer.SECOND*5
 
     // enemy settings
-    // enemy player distance
     this.ENEMY_GROUP = ['UFOs', 'meteors', 'carriers', 'smallmeteors', 'jets']
     this.ENEMY_BULLETS = ['UFOBullets', 'CarrierBullets']
     this.SCREEN_DIS = this.CENTER.distance(new Phaser.Point(0, 0))
     this.ENEMY_SPEED = 20
     this.ENEMY_DAMAGE = 0.34
+
+    // UI needed
+    // collected batteries
+    this.batteries = 0
+    this.BATTERY_X = 0.95
+    this.BATTERY_Y = 0.8
 
     // start physic engine
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -482,6 +487,7 @@ SpaceShip.GameState = {
     this.LIFE_INIT_POS = new Phaser.Point(this.game.world.width*0.95, this.game.world.height*0.1)
     this.initHeart()
     this.initEndurance()
+    this.initBattery()
   },
 
   // init hearts
@@ -532,6 +538,28 @@ SpaceShip.GameState = {
         this.endurance.scale.x = this.currentEndur
       }
     }, this)
+  },
+
+  // init battery ui
+  initBattery () {
+    let style = {
+      font: '18pt Arial',
+      fill: '#fff',
+    }
+    let subBat = this.game.add.text(this.game.world.width*0.95, this.game.world.height*0.85, '已回收', style)
+    subBat.anchor.setTo(1, 0.5)
+    this.batteryText = this.game.add.text(this.game.world.width*0.95, this.game.height*0.9, `${this.batteries} 顆能量電池`,style)
+    this.batteryText.anchor.setTo(1, 0.5)
+    // if(!this.characterText) {
+    //   this.characterText = this.game.add.text(this.game.width/2, this.game.height*0.85, '',style)
+    //   this.characterText.anchor.setTo(0.5)
+    // }
+    // this.characterText.setText(character.customParams.text)
+    // this.characterText.visible = true
+  },
+
+  setBattery () {
+    this.batteryText.setText(`${this.batteries} 顆能量電池`)
   },
 
   // game Over
