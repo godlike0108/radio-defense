@@ -15,11 +15,16 @@ SpaceShip.GameState = {
     this.PLAYER_ENDUR = 1
     this.ENDUR_RECOVER_RATE = 1
     this.ULT_SPEED = Phaser.Timer.SECOND
+    this.weaponMode = 'bullet'
 
     // player boosts
     this.SHIELD_RNG_BIG = 180
-    this.SHIELD_BOOST_TIME = 10
+    this.SHIELD_BOOST_TIME = Phaser.Timer.SECOND*5
     this.DOUBLE_GUN_DIS = 30
+    this.GUN_BOOST_TIME = Phaser.Timer.SECOND*10
+    this.LASER_DIS = 20
+    this.LASER_POINT = 10
+    this.LASER_BOOST_TIME = Phaser.Timer.SECOND*5
 
     // enemy settings
     // enemy player distance
@@ -44,6 +49,7 @@ SpaceShip.GameState = {
     this.BigShieldTexture = SpaceShip.PlayerShieldTexture(this.game, this.SHIELD_RNG_BIG)
     this.DoubleGunTexture = SpaceShip.DoubleGunTexture(this.game)
     this.UltTexture = SpaceShip.UltimateTexture(this.game)
+    this.LaserTexture = SpaceShip.LaserTexture(this.game)
 
     this.UFOTexture = SpaceShip.UFOTexture(this.game)
     this.UFOBulletTexture = SpaceShip.UFOBulletTexture(this.game)
@@ -106,6 +112,9 @@ SpaceShip.GameState = {
     this.bulletTimer.loop(this.SHOOT_SPEED, this.createPlayerBullet, this)
     this.bulletTimer.start()
 
+    // create player laser
+    this.initLaser()
+
     // create enemies
     this.initEnemies()
     this.initEnemyBullets()
@@ -115,6 +124,7 @@ SpaceShip.GameState = {
 
     // create UIs
     this.initUI()
+
 
     this.loadLevel()
   },
@@ -148,8 +158,13 @@ SpaceShip.GameState = {
 
     // press W to shoot
     if (this.game.input.keyboard.isDown(Phaser.Keyboard.W)) {
-      this.bulletTimer.resume()
+      if(this.weaponMode === 'laser') {
+        this.createLaser()
+      } else if (this.weaponMode === 'bullet') {
+        this.bulletTimer.resume()
+      }
     } else {
+      this.killLaser()
       this.bulletTimer.pause()
     }
 
@@ -163,6 +178,8 @@ SpaceShip.GameState = {
       this.game.physics.arcade.overlap(this.playerCore, this[type], this.damagePlayer, null, this)
       // enemy and ult
       this.game.physics.arcade.overlap(this.ult, this[type], this.killEnemy, null, this)
+      // enemy and laser
+      this.game.physics.arcade.overlap(this.laser, this[type], this.killEnemy, null, this)
     })
 
     this.ENEMY_BULLETS.forEach(type => {
@@ -175,6 +192,7 @@ SpaceShip.GameState = {
 
     // itemBoxes and playerBullets collision
     this.game.physics.arcade.overlap(this.itemBoxes, this.playerBullets, this.eatItemBox, null, this)
+    this.game.physics.arcade.overlap(this.itemBoxes, this.laser, this.eatItemBox, null, this)
   },
 
   // custom
@@ -218,6 +236,38 @@ SpaceShip.GameState = {
         bullet.rotation = this.playerDoubleGun.rotation
       }
     }
+  },
+
+  initLaser () {
+    this.laser = this.add.group()
+    this.laser.enableBody = true
+  },
+
+  createLaser () {
+    // 取得槍的角度做出單位向量
+    let unit = new Phaser.Point(1,0).rotate(0, 0, this.playerGun.rotation).multiply(this.LASER_DIS, this.LASER_DIS)
+    let firstPoint = this.playerGun.position.clone()
+    // 用固定角度做很多向量點
+    let laserPoints = []
+    for(let i=0; i<this.LASER_POINT; i++) {
+      firstPoint.add(unit.x, unit.y)
+      laserPoints.push(firstPoint.add(unit.x, unit.y).clone())
+    }
+    laserPoints.forEach(point => {
+      let laserSec = this.laser.getFirstExists(false)
+      if(!laserSec) {
+        laserSec = new Phaser.Sprite(this.game, point.x, point.y, this.LaserTexture)
+        laserSec.anchor.setTo(0.5)
+        this.laser.add(laserSec)
+      } else {
+        laserSec.reset(point.x, point.y)
+      }
+    })
+    this.game.time.events.add(100, this.killLaser, this)
+  },
+
+  killLaser () {
+    this.laser.killAll()
   },
 
   initEnemies () {
@@ -302,13 +352,16 @@ SpaceShip.GameState = {
       case 'ult':
         this.releaseUlt()
         break
+      case 'laser':
+        this.laserBoost()
+        break
     }
   },
 
   shieldBoost() {
     this.playerShield.kill()
     this.playerBigShield.revive()
-    this.game.time.events.add(Phaser.Timer.SECOND*this.SHIELD_BOOST_TIME, function() {
+    this.game.time.events.add(this.SHIELD_BOOST_TIME, function() {
       this.playerShield.revive()
       this.playerBigShield.kill()
     }, this)
@@ -317,7 +370,7 @@ SpaceShip.GameState = {
   doubleGunBoost() {
     this.playerGun.kill()
     this.playerDoubleGun.revive()
-    this.game.time.events.add(Phaser.Timer.SECOND*this.GUN_BOOST_TIME, function() {
+    this.game.time.events.add(this.GUN_BOOST_TIME, function() {
       this.playerGun.revive()
       this.playerDoubleGun.kill()
     }, this)
@@ -331,6 +384,15 @@ SpaceShip.GameState = {
       this.ult.scale.setTo(0.2)
       this.ult.kill()
     })
+  },
+
+  laserBoost() {
+    // 切換雷射
+    this.bulletTimer.pause()
+    this.weaponMode = 'laser'
+    this.game.time.events.add(this.LASER_BOOST_TIME, function() {
+      this.weaponMode = 'bullet'
+    }, this)
   },
 
   damageEnemy (enemy, bullet) {
