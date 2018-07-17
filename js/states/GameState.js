@@ -29,6 +29,7 @@ SpaceShip.GameState = {
   },
 
   preload () {
+    // player texture
     this.playerCoreTexture = SpaceShip.PlayerCoreTexture(this.game)
     this.playerTexture = SpaceShip.PlayerTexture(this.game)
     this.playerShieldTexture = SpaceShip.PlayerShieldTexture(this.game, this.SHIELD_RNG)
@@ -42,6 +43,10 @@ SpaceShip.GameState = {
     this.CarrierTexture = SpaceShip.CarrierTexture(this.game)
     // item texture
     this.load.image('itemBox', 'assets/box.png')
+
+    // UI texture
+    this.load.image('heart', 'assets/heart.png')
+    this.playerEndurTexture = SpaceShip.PlayerEnduranceTexture(this.game)
 
     // level data
     this.load.text('lv1', 'data/level/1.json')
@@ -88,6 +93,9 @@ SpaceShip.GameState = {
 
     // create itemBoxes
     this.initItemBoxes()
+
+    // create UIs
+    this.initUI()
 
     this.loadLevel()
   },
@@ -265,7 +273,11 @@ SpaceShip.GameState = {
 
   damagePlayer(playerCore, enemyThings) {
     enemyThings.kill()
+    // player get damage
     playerCore.damage(1)
+    if(playerCore.health >= 0) {
+      this.currentPlayerLife[playerCore.health].kill()
+    }
   },
 
   loadLevel () {
@@ -295,5 +307,38 @@ SpaceShip.GameState = {
         this.scheduleNextEnemy()
       })
     }
-  }
+  },
+
+  // init UIs
+  initUI () {
+    this.LIFE_INIT_POS = new Phaser.Point(this.game.world.width*0.95, this.game.world.height*0.1)
+    this.initHeart()
+    this.initEndurance()
+  },
+
+  // init hearts
+  initHeart () {
+    // check player life
+    this.HEART_SPACE = 10
+    this.HEART_SCALE = 0.5
+    this.HEART_SIZE = this.game.cache.getImage('heart').width * this.HEART_SCALE
+    this.currentPlayerLife = []
+
+    let heartPos = new Phaser.Point(this.LIFE_INIT_POS.x, this.LIFE_INIT_POS.y)
+    // create heart images
+    for(let i = 0; i < this.PLAYER_HEALTH; i++) {
+      let heart = this.game.add.image(heartPos.x - this.HEART_SIZE, heartPos.y, 'heart')
+      heart.scale.setTo(this.HEART_SCALE)
+      this.currentPlayerLife.push(heart)
+      heartPos.x -= (this.HEART_SPACE + this.HEART_SIZE)
+      console.log(heartPos.x)
+    }
+  },
+
+  // init endurance
+  initEndurance () {
+    let endurPos = this.LIFE_INIT_POS.subtract(0, this.HEART_SIZE/2 + this.HEART_SPACE)
+    this.endurance = this.game.add.image(endurPos.x, endurPos.y, this.playerEndurTexture)
+    this.endurance.anchor.setTo(1, 0)
+  },
 }
