@@ -2,6 +2,14 @@ var SpaceShip = SpaceShip || {}
 
 SpaceShip.PlayState = {
   init () {
+    // game settings
+    this.currentLevel = 1
+    this.totalLevel = 3
+    this.allIn = false
+    this.allOut = false
+    // this.levelTimer = this.game.time.create(false)
+    // this.levelTimer.start()
+
     this.CENTER = new Phaser.Point(this.game.world.centerX, this.game.world.centerY)
     // player settings
     this.ANG_VEL = 2
@@ -73,6 +81,8 @@ SpaceShip.PlayState = {
 
     // level data
     this.load.text('lv1', 'data/level/1.json')
+    this.load.text('lv1', 'data/level/2.json')
+    this.load.text('lv1', 'data/level/3.json')
 
   },
 
@@ -454,7 +464,9 @@ SpaceShip.PlayState = {
 
   loadLevel () {
     this.currentEnemyIndex = 0
-    this.levelData = JSON.parse(this.game.cache.getText(`lv1`))
+    this.allIn = false
+    this.allOut = false
+    this.levelData = JSON.parse(this.game.cache.getText(`lv${this.currentLevel}`))
     this.scheduleNextEnemy()
   },
 
@@ -478,7 +490,29 @@ SpaceShip.PlayState = {
         this.currentEnemyIndex++
         this.scheduleNextEnemy()
       })
+    } else {
+      this.allIn = true
+      this.levelEndCheck()
     }
+  },
+
+  levelEndCheck () {
+    if(this.allIn && this.allOut) {
+      this.loadLevel()
+    } else {
+      this.game.time.events.add(1000, function() {
+        if(this.allOutCheck()) {
+          this.allOut = true
+        }
+        this.levelEndCheck()
+      }, this)
+    }
+  },
+
+  allOutCheck () {
+    return this.ENEMY_GROUP.every(type => {
+      return this[type].children.every(enemy => !enemy.exists)
+    })
   },
 
   // init UIs

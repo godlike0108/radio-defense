@@ -25,6 +25,10 @@ SpaceShip.StartState = {
     }
   },
 
+  preload () {
+    this.load.image('logo', 'assets/logo.png')
+  },
+
   create () {
 
     // add graphics
@@ -33,6 +37,11 @@ SpaceShip.StartState = {
       this.cover.lineStyle(...circle.style)
       this.cover.drawCircle(circle.x, circle.y, circle.r)
     })
+
+    // add logo
+    this.logo = this.game.add.sprite(this.wWidth*0.5, this.wHeight*0.42, 'logo')
+    this.logo.anchor.setTo(0.5)
+    this.logo.scale.setTo(0.6)
 
     // add start button
     this.button = this.game.add.sprite(this.wWidth*0.5, this.wHeight*0.6, this.buttonTexture())

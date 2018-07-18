@@ -1,0 +1,28 @@
+{
+  "enemies": [
+    {
+      "time": 0.5,
+      "type": "meteor"
+    },
+    {
+      "time": 2,
+      "type": "meteor"
+    },
+    {
+      "time": 3,
+      "type": "ufo"
+    },
+    {
+      "time": 4,
+      "type": "meteor"
+    },
+    {
+      "time": 5,
+      "type": "meteor"
+    },
+    {
+      "time": 6,
+      "type": "meteor"
+    }
+  ]
+}
