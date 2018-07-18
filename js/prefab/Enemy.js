@@ -34,13 +34,13 @@ SpaceShip.Enemy = class Enemy extends Phaser.Sprite {
 
   dropItemBox () {
     let itemBox = this.itemBoxes.getFirstExists(false)
-    let itemBoxType = ['itemDouble', 'itemShield', 'itemLaser', 'itemHeart', 'itemUlt', 'itemWave']
+    let itemBoxType = ['itemDouble', 'itemShield', 'itemLaser', 'itemHeart', 'itemUlt']
     let rnd = this.game.rnd.between(0, itemBoxType.length)
     if(!itemBox) {
       itemBox = new SpaceShip.ItemBox(this.game, this.x, this.y, itemBoxType[rnd])
       this.itemBoxes.add(itemBox)
     } else {
-      itemBox.reset(this.x, this.y)
+      itemBox.reset(this.x, this.y, itemBoxType[rnd])
     }
 
     itemBox.body.velocity.x = this.game.rnd.between(-this.ITEM_SPEED, this.ITEM_SPEED)

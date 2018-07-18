@@ -81,8 +81,8 @@ SpaceShip.PlayState = {
 
     // level data
     this.load.text('lv1', 'data/level/1.json')
-    this.load.text('lv1', 'data/level/2.json')
-    this.load.text('lv1', 'data/level/3.json')
+    // this.load.text('lv2', 'data/level/2.json')
+    // this.load.text('lv3', 'data/level/3.json')
 
   },
 
@@ -463,11 +463,17 @@ SpaceShip.PlayState = {
   },
 
   loadLevel () {
-    this.currentEnemyIndex = 0
-    this.allIn = false
-    this.allOut = false
-    this.levelData = JSON.parse(this.game.cache.getText(`lv${this.currentLevel}`))
-    this.scheduleNextEnemy()
+    let hasLevel = this.game.cache.checkTextKey(`lv${this.currentLevel}`)
+    if(!hasLevel) {
+      this.gameOver()
+    } else {
+      this.levelData = JSON.parse(this.game.cache.getText(`lv${this.currentLevel}`))
+      this.currentEnemyIndex = 0
+      this.allIn = false
+      this.allOut = false
+      this.showWaveNotice()
+      this.scheduleNextEnemy()
+    }
   },
 
   scheduleNextEnemy () {
@@ -498,6 +504,7 @@ SpaceShip.PlayState = {
 
   levelEndCheck () {
     if(this.allIn && this.allOut) {
+      this.currentLevel++
       this.loadLevel()
     } else {
       this.game.time.events.add(1000, function() {
@@ -522,6 +529,7 @@ SpaceShip.PlayState = {
     this.initEndurance()
     this.initBattery()
     this.initCountdown()
+    this.initWaveNotice()
   },
 
   // init hearts
@@ -610,6 +618,24 @@ SpaceShip.PlayState = {
       if(time === 0) {
         this.gameOver()
       }
+    }, this)
+  },
+
+  initWaveNotice () {
+    let style = {
+      font: '20pt Arial',
+      fill: '#fff',
+    }
+    this.waveNotice = this.game.add.text(this.game.world.width*0.5, this.game.world.height*0.2, `Wave ${this.currentLevel}`, style)
+    this.waveNotice.anchor.setTo(0.5)
+    this.waveNotice.kill()
+  },
+
+  showWaveNotice (level) {
+    this.waveNotice.setText(`Wave ${this.currentLevel}`)
+    this.waveNotice.revive()
+    this.game.time.events.add(Phaser.Timer.SECOND, function() {
+      this.waveNotice.kill()
     }, this)
   },
 

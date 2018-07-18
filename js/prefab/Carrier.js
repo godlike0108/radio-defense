@@ -56,6 +56,7 @@ SpaceShip.Carrier = class Carrier extends SpaceShip.Enemy {
     super.reset(x, y)
     this.health = 4
     this.enemyTimer.resume()
+    this.angle = this.position.angle(this.target, true)
   }
 
   shoot () {

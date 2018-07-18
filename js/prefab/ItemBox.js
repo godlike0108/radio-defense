@@ -10,7 +10,9 @@ SpaceShip.ItemBox = class ItemBox extends Phaser.Sprite {
     this.outOfBoundsKill = true
   }
 
-  reset (x, y) {
+  reset (x, y, key) {
     super.reset(x, y)
+    this.type = key
+    this.loadTexture(key)
   }
 }
