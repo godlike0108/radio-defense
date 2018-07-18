@@ -5,6 +5,7 @@ SpaceShip.UFO = class UFO extends SpaceShip.Enemy {
     super(game, x, y, speed, target, itemBoxes)
     this.ANG_VEL = 0.1
     this.BULLET_SPEED = 50
+    this.SHOOT_CD = Phaser.Timer.SECOND*3
     this.health = 3
     this.loadTexture(SpaceShip.UFOTexture(game))
 
@@ -34,6 +35,7 @@ SpaceShip.UFO = class UFO extends SpaceShip.Enemy {
 
   reset (x, y) {
     super.reset(x, y)
+    this.health = 3
     this.enemyTimer.resume()
   }
 
@@ -50,6 +52,6 @@ SpaceShip.UFO = class UFO extends SpaceShip.Enemy {
 
   scheduleShooting () {
     this.shoot()
-    this.enemyTimer.add(Phaser.Timer.SECOND, this.scheduleShooting, this)
+    this.enemyTimer.add(this.SHOOT_CD, this.scheduleShooting, this)
   }
 }

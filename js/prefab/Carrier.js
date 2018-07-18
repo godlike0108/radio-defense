@@ -10,12 +10,14 @@ SpaceShip.Carrier = class Carrier extends SpaceShip.Enemy {
     // shooting
     this.bullets = bullets
     this.BULLET_SPEED = 80
+    this.SHOOT_CD = Phaser.Timer.SECOND*2
     this.enemyTimer = this.game.time.create(false)
     this.enemyTimer.start()
     this.scheduleShooting()
 
     // create jets
     this.jets = group
+    this.JET_CD = Phaser.Timer.SECOND*4
     this.BROKE_DIS_MIN = 60
     this.BROKE_DIS_MAX = 120
     this.BROKE_ANG_MIN = 110
@@ -52,6 +54,7 @@ SpaceShip.Carrier = class Carrier extends SpaceShip.Enemy {
 
   reset (x, y) {
     super.reset(x, y)
+    this.health = 4
     this.enemyTimer.resume()
   }
 
@@ -68,7 +71,7 @@ SpaceShip.Carrier = class Carrier extends SpaceShip.Enemy {
 
   scheduleShooting () {
     this.shoot()
-    this.enemyTimer.add(Phaser.Timer.SECOND, this.scheduleShooting, this)
+    this.enemyTimer.add(this.SHOOT_CD, this.scheduleShooting, this)
   }
 
   createJet () {
@@ -89,6 +92,6 @@ SpaceShip.Carrier = class Carrier extends SpaceShip.Enemy {
 
   scheduleCreateJet () {
     this.createJet()
-    this.enemyTimer.add(Phaser.Timer.SECOND*3, this.scheduleCreateJet, this)
+    this.enemyTimer.add(this.JET_CD, this.scheduleCreateJet, this)
   }
 }
