@@ -6,4 +6,4 @@ SpaceShip.game.state.add('start', SpaceShip.StartState)
 SpaceShip.game.state.add('play', SpaceShip.PlayState)
 SpaceShip.game.state.add('gameover', SpaceShip.GameoverState)
 
-SpaceShip.game.state.start('gameover')
+SpaceShip.game.state.start('start')

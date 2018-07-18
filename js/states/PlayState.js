@@ -15,8 +15,7 @@ SpaceShip.PlayState = {
     this.ANG_VEL = 2
     this.ANG_TOL = this.game.math.degToRad(6) // 在此角度區間為靜止
     this.GUN_DIS = 90
-    this.SHIELD_DIS = 100
-    this.SHIELD_RNG = 60
+    this.shieldRange = 90
     this.BULLET_SPEED = 500
     this.SHOOT_SPEED = Phaser.Timer.SECOND/5*2
     this.PLAYER_HEART = 3
@@ -26,7 +25,6 @@ SpaceShip.PlayState = {
     this.weaponMode = 'bullet'
 
     // player boosts
-    this.SHIELD_RNG_BIG = 180
     this.SHIELD_BOOST_TIME = Phaser.Timer.SECOND*5
     this.DOUBLE_GUN_DIS = 30
     this.GUN_BOOST_TIME = Phaser.Timer.SECOND*10
@@ -54,11 +52,11 @@ SpaceShip.PlayState = {
     // player texture
     this.playerCoreTexture = SpaceShip.PlayerCoreTexture(this.game)
     this.playerTexture = SpaceShip.PlayerTexture(this.game)
-    this.playerShieldTexture = SpaceShip.PlayerShieldTexture(this.game, this.SHIELD_RNG)
+    this.playerShieldTexture = SpaceShip.PlayerShieldTexture(this.game, 90)
+    this.playerBigShieldTexture = SpaceShip.PlayerShieldTexture(this.game, 180)
     this.playerGunTexture = SpaceShip.PlayerGunTexture(this.game)
     this.playerBulletTexture = SpaceShip.PlayerBulletTexture(this.game)
     // player boost texture
-    this.BigShieldTexture = SpaceShip.PlayerShieldTexture(this.game, this.SHIELD_RNG_BIG)
     this.DoubleGunTexture = SpaceShip.DoubleGunTexture(this.game)
     this.UltTexture = SpaceShip.UltimateTexture(this.game)
     this.LaserTexture = SpaceShip.LaserTexture(this.game)
@@ -81,8 +79,8 @@ SpaceShip.PlayState = {
 
     // level data
     this.load.text('lv1', 'data/level/1.json')
-    // this.load.text('lv2', 'data/level/2.json')
-    // this.load.text('lv3', 'data/level/3.json')
+    this.load.text('lv2', 'data/level/2.json')
+    this.load.text('lv3', 'data/level/3.json')
 
   },
 
@@ -97,9 +95,10 @@ SpaceShip.PlayState = {
     this.player.anchor.setTo(0.5)
 
     // create player shield
-    this.playerShield = this.game.add.sprite(this.CENTER.x - this.SHIELD_DIS, this.CENTER.y, this.playerShieldTexture)
-    this.playerShield.anchor.setTo(0, 0.5)
+    this.playerShield = this.game.add.sprite(this.CENTER.x, this.CENTER.y, this.playerShieldTexture)
+    this.playerShield.anchor.setTo(0.5, 0.5)
     this.game.physics.arcade.enable(this.playerShield)
+    this.playerShield.body.setCircle(100)
 
     // create player big shield and hide
     this.playerBigShield = this.game.add.sprite(this.CENTER.x - this.SHIELD_DIS, this.CENTER.y, this.BigShieldTexture)
@@ -153,7 +152,7 @@ SpaceShip.PlayState = {
     let pointerAngle = this.game.physics.arcade.angleToPointer(this.playerCore)
     let playerGunAngle = this.game.physics.arcade.angleBetween(this.playerCore, this.playerGun)
     
-    if (pointerAngle - playerGunAngle > this.ANG_TOL/2 && pointerAngle - playerGunAngle <= Math.PI || pointerAngle - playerGunAngle < 0 && pointerAngle - playerGunAngle < -Math.PI) {
+    if (pointerAngle - playerGunAngle > this.ANG_TOL/2 && pointerAngle - playerGunAngle <= Math.PI || pointerAngle - playerGunAngle < -Math.PI) {
       this.playerGun.angle += this.ANG_VEL
       this.playerGun.position.rotate(this.playerCore.x, this.playerCore.y, this.ANG_VEL, true)
       this.playerDoubleGun.angle += this.ANG_VEL
@@ -161,9 +160,7 @@ SpaceShip.PlayState = {
 
       this.playerShield.angle = this.playerGun.angle
       this.playerShield.position.rotate(this.playerCore.x, this.playerCore.y, this.ANG_VEL, true)
-      this.playerBigShield.angle = this.playerGun.angle
-      this.playerBigShield.position.rotate(this.playerCore.x, this.playerCore.y, this.ANG_VEL, true)
-    } else if (pointerAngle - playerGunAngle < -this.ANG_TOL/2 && pointerAngle - playerGunAngle <= Math.PI || pointerAngle - playerGunAngle > 0 && pointerAngle - playerGunAngle > Math.PI) {
+    } else if (pointerAngle - playerGunAngle < -this.ANG_TOL/2 && pointerAngle - playerGunAngle <= Math.PI || pointerAngle - playerGunAngle > Math.PI) {
       this.playerGun.angle -= this.ANG_VEL
       this.playerGun.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
       this.playerDoubleGun.angle -= this.ANG_VEL
@@ -171,8 +168,6 @@ SpaceShip.PlayState = {
 
       this.playerShield.angle = this.playerGun.angle
       this.playerShield.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
-      this.playerBigShield.angle = this.playerGun.angle
-      this.playerBigShield.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
     }
 
     // press W to shoot
@@ -191,8 +186,7 @@ SpaceShip.PlayState = {
       // bullet and enemy collision detection
       this.game.physics.arcade.overlap(this[type], this.playerBullets, this.damageEnemy, null, this)
       // shield ane enemy collision detection
-      this.game.physics.arcade.overlap(this.playerShield, this[type], this.killEnemy, null, this)
-      this.game.physics.arcade.overlap(this.playerBigShield, this[type], this.killEnemy, null, this)
+      this.game.physics.arcade.overlap(this.playerShield, this[type], this.killEnemy, this.shieldRangeCheck, this)
       // enemy and player
       this.game.physics.arcade.overlap(this.playerCore, this[type], this.damagePlayer, null, this)
       // enemy and ult
@@ -203,8 +197,7 @@ SpaceShip.PlayState = {
 
     this.ENEMY_BULLETS.forEach(type => {
       // enemy bullet and shield
-      this.game.physics.arcade.overlap(this.playerShield, this[type], this.killBullets, null, this)
-      this.game.physics.arcade.overlap(this.playerBigShield, this[type], this.killBullets, null, this)
+      this.game.physics.arcade.overlap(this.playerShield, this[type], this.killBullets, this.shieldRangeCheck, this)
       // enemy bullet and core
       this.game.physics.arcade.overlap(this.playerCore, this[type], this.damagePlayer, null, this)
     })
@@ -215,6 +208,20 @@ SpaceShip.PlayState = {
   },
 
   // custom
+  shieldRangeCheck (shield, enemyThing) {
+    let enemyAngle = this.game.physics.arcade.angleBetween(this.playerCore, enemyThing)
+    let angle = (shield.angle + 180 > 180) ? shield.angle - 180 : shield.angle + 180
+    let shieldAngle = this.game.math.degToRad(angle)
+    let delta = enemyAngle - shieldAngle
+    let rng = this.game.math.degToRad(this.shieldRange)
+    //console.log(delta < rng/2, delta > (Math.PI*2-rng/2), delta < (rng/2 - Math.PI*2))
+    if(delta < rng/2 || delta > (Math.PI*2-rng/2) || delta < (rng/2 - Math.PI*2)) {
+      return true
+    } else {
+      return false
+    }
+  },
+
   initPlayerBullets () {
     this.playerBullets = this.add.group()
     this.playerBullets.enableBody = true
@@ -380,11 +387,11 @@ SpaceShip.PlayState = {
   },
 
   shieldBoost() {
-    this.playerShield.kill()
-    this.playerBigShield.revive()
+    this.playerShield.loadTexture(this.playerBigShieldTexture)
+    this.shieldRange = 180
     this.game.time.events.add(this.SHIELD_BOOST_TIME, function() {
-      this.playerShield.revive()
-      this.playerBigShield.kill()
+      this.playerShield.loadTexture(this.playerShieldTexture)
+      this.shieldRange = 90
     }, this)
   },
 
