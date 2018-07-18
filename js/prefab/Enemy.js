@@ -26,8 +26,8 @@ SpaceShip.Enemy = class Enemy extends Phaser.Sprite {
     }
 
     if(this.health <= 0) {
-      this.game.state.states.GameState.batteries++
-      this.game.state.states.GameState.setBattery()
+      this.game.state.states.play.batteries++
+      this.game.state.states.play.setBattery()
     }
   }
 

@@ -1,6 +1,6 @@
 var SpaceShip = SpaceShip || {}
 
-SpaceShip.GameState = {
+SpaceShip.PlayState = {
   init () {
     this.CENTER = new Phaser.Point(this.game.world.centerX, this.game.world.centerY)
     // player settings
@@ -589,6 +589,6 @@ SpaceShip.GameState = {
 
   // game Over
   gameOver () {
-    console.log('game over')
+    this.game.state.start('gameover', true, false, this.batteries)
   },
 }
