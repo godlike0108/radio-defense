@@ -7,8 +7,6 @@ SpaceShip.PlayState = {
     this.totalLevel = 3
     this.allIn = false
     this.allOut = false
-    // this.levelTimer = this.game.time.create(false)
-    // this.levelTimer.start()
 
     this.CENTER = new Phaser.Point(this.game.world.centerX, this.game.world.centerY)
     // player settings
@@ -52,7 +50,9 @@ SpaceShip.PlayState = {
     // player texture
     this.playerCoreTexture = SpaceShip.PlayerCoreTexture(this.game)
     this.playerTexture = SpaceShip.PlayerTexture(this.game)
-    this.playerShieldTexture = SpaceShip.PlayerShieldTexture(this.game, 90)
+
+    let SHIELD = {r: 100, lineWidth: 5, fill: 0xFFFFFF, range: 90}
+    this.playerShieldTexture = SpaceShip.Texture('shield', SHIELD, this.game)
     this.playerBigShieldTexture = SpaceShip.PlayerShieldTexture(this.game, 180)
     this.playerGunTexture = SpaceShip.PlayerGunTexture(this.game)
     this.playerBulletTexture = SpaceShip.PlayerBulletTexture(this.game)
@@ -155,16 +155,16 @@ SpaceShip.PlayState = {
     if (pointerAngle - playerGunAngle > this.ANG_TOL/2 && pointerAngle - playerGunAngle <= Math.PI || pointerAngle - playerGunAngle < -Math.PI) {
       this.playerGun.angle += this.ANG_VEL
       this.playerGun.position.rotate(this.playerCore.x, this.playerCore.y, this.ANG_VEL, true)
-      this.playerDoubleGun.angle += this.ANG_VEL
-      this.playerDoubleGun.position.rotate(this.playerCore.x, this.playerCore.y, this.ANG_VEL, true)
+      this.playerDoubleGun.angle = this.playerGun.angle
+      this.playerDoubleGun.position = this.playerGun.position.clone()
 
       this.playerShield.angle = this.playerGun.angle
       this.playerShield.position.rotate(this.playerCore.x, this.playerCore.y, this.ANG_VEL, true)
     } else if (pointerAngle - playerGunAngle < -this.ANG_TOL/2 && pointerAngle - playerGunAngle <= Math.PI || pointerAngle - playerGunAngle > Math.PI) {
       this.playerGun.angle -= this.ANG_VEL
       this.playerGun.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
-      this.playerDoubleGun.angle -= this.ANG_VEL
-      this.playerDoubleGun.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
+      this.playerDoubleGun.angle = this.playerGun.angle
+      this.playerDoubleGun.position = this.playerGun.position.clone()
 
       this.playerShield.angle = this.playerGun.angle
       this.playerShield.position.rotate(this.playerCore.x, this.playerCore.y, -this.ANG_VEL, true)
@@ -243,7 +243,7 @@ SpaceShip.PlayState = {
     }
 
     if(this.playerDoubleGun.exists) {
-      let dir = this.playerDoubleGun.position.clone().rperp().normalize().multiply(15, 15)
+      let dir = this.playerDoubleGun.position.clone().rperp().normalize().multiply(20, 20)
       let gunPoints = [
         this.playerDoubleGun.position.clone().add(dir.x, dir.y),
         this.playerDoubleGun.position.clone().subtract(dir.x, dir.y)
@@ -457,12 +457,9 @@ SpaceShip.PlayState = {
         this.currentEndur = this.PLAYER_ENDUR
         this.endurance.scale.x = this.currentEndur
       })
-      this.endurance.scale.x = this.PLAYER_ENDUR
       // player get damage
       this.damageHeart()
     } else {
-      this.tweenEndur = this.game.add.tween(this.endurance.scale).to({x: 0}, Phaser.Timer.SECOND)
-      this.tweenEndur.start()
       // player get damage
       this.damageHeart()
       this.gameOver()
@@ -599,12 +596,6 @@ SpaceShip.PlayState = {
     subBat.anchor.setTo(1, 0.5)
     this.batteryText = this.game.add.text(this.game.world.width*0.95, this.game.world.height*0.9, `${this.batteries} 顆能量電池`,style)
     this.batteryText.anchor.setTo(1, 0.5)
-    // if(!this.characterText) {
-    //   this.characterText = this.game.add.text(this.game.width/2, this.game.height*0.85, '',style)
-    //   this.characterText.anchor.setTo(0.5)
-    // }
-    // this.characterText.setText(character.customParams.text)
-    // this.characterText.visible = true
   },
 
   setBattery () {
